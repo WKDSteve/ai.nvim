@@ -14,9 +14,6 @@
 local this = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p")
 local root = vim.fs.dirname(vim.fs.dirname(vim.fs.normalize(this)))
 
--- Hard dependencies only. data.nvim and gitsuite.nvim are optional (see below); ui.nvim is not
--- needed: none of the specs touch ai.ui.panel / ai.ui.badge / ai.bindings.actions, the only
--- modules that require it, and every one of those requires is lazy.
 local DEPS = { "testing.nvim", "lib.nvim" }
 
 ---@type table<string, string>
