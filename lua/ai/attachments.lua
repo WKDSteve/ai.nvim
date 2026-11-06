@@ -101,7 +101,7 @@ function M.from_bytes(data, media_type, opts)
     return nil, string.format("no attachment kind for media type %q", media_type)
   end
 
-  -- `vim.base64.encode` is Neovim 0.10+, already this plugin's minimum.
+  -- `vim.base64.encode` is Neovim 0.10+, older than this plugin's minimum.
   local ok, encoded = pcall(vim.base64.encode, data)
   if not ok then
     return nil, "base64 encoding failed: " .. tostring(encoded)

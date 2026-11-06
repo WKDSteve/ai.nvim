@@ -1,6 +1,6 @@
 # Requirements
 
-- Neovim >= 0.10 (needs `vim.system`, which `lib.nvim.net.curl` requires).
+- Neovim >= 0.11 (`lib.nvim` calls the positional `vim.validate`; on 0.10 `vim.system` starts a child with `clear_env` without any environment).
 - [`lib.nvim`](https://github.com/WKDSteve/lib.nvim) -- hard dependency.
   `fetch_stream`/`secret_headers` on `lib.nvim.net.curl` must be present; a
   too-old checkout is flagged by `:checkhealth ai`.
@@ -12,9 +12,8 @@
   rendering path -- `ask`/`stream`/`explain`/`info` all fail without it.
   Inline completion (`docs/configuration.md`'s `completion` table) is the
   one exception: it renders through raw extmarks (`lua/ai/ui/ghost.lua`),
-  not `ui.kit`, so it still works even if `ui.nvim` is missing (Neovim >=
-  0.10 above is the only real requirement it adds, for
-  `virt_text_pos = "inline"`).
+  not `ui.kit`, so it still works even if `ui.nvim` is missing (the Neovim
+  version above already covers what it needs, `virt_text_pos = "inline"`).
 - `curl` on `PATH` -- every provider shells out to it.
 - At least one provider actually usable:
   - **claude**: `ANTHROPIC_API_KEY` set in the environment.

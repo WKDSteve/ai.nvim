@@ -155,7 +155,7 @@ relative prefix/suffix, built on the same `lib.nvim.harvest.scope`
 kind was needed), `completion/prompt.lua` (pure functions: frame the
 fill-in-the-middle task as a chat prompt, then strip a markdown fence a
 model adds despite being told not to), and `ui/ghost.lua` (the actual
-rendering, `virt_text_pos = "inline"` extmarks -- Neovim >= 0.10, already
+rendering, `virt_text_pos = "inline"` extmarks -- Neovim >= 0.10, below
 this plugin's minimum). `completion/init.lua` is the only one that ties
 them together and holds state.
 

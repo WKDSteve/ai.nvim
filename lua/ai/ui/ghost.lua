@@ -1,7 +1,7 @@
 ---@module 'ai.ui.ghost'
 --- Inline "ghost text" rendering for completion suggestions: the first
 --- suggested line renders as `virt_text_pos = "inline"` virtual text right
---- at the cursor (Neovim >= 0.10, which `health.lua` already requires --
+--- at the cursor (Neovim >= 0.10, older than what `health.lua` requires --
 --- older Neovim has no inline virtual text position), any further suggested
 --- lines render as `virt_lines` below. A sibling to `ui/panel.lua`/
 --- `ui/badge.lua`, not a rework of either -- a fundamentally different

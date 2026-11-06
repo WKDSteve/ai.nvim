@@ -34,7 +34,7 @@ migration is what |ai-attachments| were built for.
 ==============================================================================
 2. REQUIREMENTS                                              *ai-requirements*
 
-- Neovim >= 0.10 (needs `vim.system`, which `lib.nvim.net.curl` requires).
+- Neovim >= 0.11 (`lib.nvim` calls the positional `vim.validate`; on 0.10 `vim.system` starts a child with `clear_env` without any environment).
 - lib.nvim (github.com/WKDSteve/lib.nvim) -- hard dependency.
   `fetch_stream`/`secret_headers` on `lib.nvim.net.curl` must be present; a
   too-old checkout is flagged by |:checkhealth| ai.
@@ -848,7 +848,7 @@ not a string is dropped to its default and reported by |:checkhealth|.
 :checkhealth ai
 
 Reports:
-  - core -- Neovim version (`vim.system` needs >= 0.10), curl on PATH.
+  - core -- Neovim version (>= 0.11), curl on PATH.
   - lib.nvim -- each required submodule (net.curl, harvest.scope, progress,
     ui.kit, usercmd.composer, bindings.keymap), plus a specific check that
     `lib.nvim.net.curl.fetch_stream` exists -- a too-old lib.nvim checkout

@@ -55,7 +55,7 @@ jobs:
         nvim: [stable]
         include:
           - os: ubuntu-latest
-            nvim: v0.10.4
+            nvim: v0.11.4
     defaults:
       run:
         # Windows runners default to PowerShell; one shell on all three keeps

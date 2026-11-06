@@ -12,10 +12,10 @@ local M = {}
 ---@return nil
 function M.check()
   vim.health.start("ai.nvim: core")
-  if lib_health.version_ok({ 0, 10, 0 }) then
-    vim.health.ok("Neovim >= 0.10 (vim.system)")
+  if lib_health.version_ok({ 0, 11, 0 }) then
+    vim.health.ok("Neovim >= 0.11")
   else
-    vim.health.error("Neovim 0.10+ required -- lib.nvim.net.curl needs vim.system")
+    vim.health.error("Neovim 0.11+ required -- lib.nvim calls the positional vim.validate")
   end
 
   if vim.fn.executable("curl") == 1 then

@@ -2,7 +2,7 @@
 
 What each section reports:
 
-- **core** -- Neovim version (`vim.system` needs >= 0.10), `curl` on `PATH`.
+- **core** -- Neovim version (>= 0.11), `curl` on `PATH`.
 - **lib.nvim** -- each required submodule (`net.curl`, `harvest.scope`,
   `progress`, `ui.kit`, `usercmd.composer`, `bindings.keymap`), plus a
   specific check that `lib.nvim.net.curl.fetch_stream` exists -- a too-old
