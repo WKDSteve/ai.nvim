@@ -39,15 +39,23 @@ jobs:
           args: --check lua/ plugin/ TESTS/
 
   test:
-    name: tests (${{ matrix.os }})
+    name: tests (${{ matrix.os }}, Neovim ${{ matrix.nvim }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     strategy:
       # One platform failing must not cancel the others: which of the three
       # broke is the whole information content of this job.
       fail-fast: false
+      # Three platforms on stable, plus the promised minimum on Linux only: the
+      # version floor is an API question, which does not depend on the platform.
+      # README, docs/requirements.md, doc/ai.txt and health.lua promise this
+      # version; TESTS/ai/min_version_spec.lua keeps them and this line together.
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        nvim: [stable]
+        include:
+          - os: ubuntu-latest
+            nvim: v0.10.4
     defaults:
       run:
         # Windows runners default to PowerShell; one shell on all three keeps
@@ -67,6 +75,7 @@ jobs:
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
+          version: ${{ matrix.nvim }}
 
       # Checked out from the branch that only moves once the dependency's own CI is green.
       - uses: actions/checkout@v5
@@ -82,7 +91,9 @@ jobs:
         run: |
           exec > >(tee -a "$RUNNER_TEMP/test-output.log") 2>&1
           scripts/test.sh --json "$RUNNER_TEMP/testing-ir.json"
+      # Conformance reads the surface the run exercised, which is measured on stable.
       - name: Conformance gate
+        if: matrix.nvim == 'stable'
         working-directory: ai.nvim
         env:
           LIB_NVIM_DIR: ${{ github.workspace }}/lib.nvim
@@ -90,7 +101,7 @@ jobs:
       # The IR of the Linux run carries the surface the specs exercised: the baseline (surface.baseline.json) is
       # written from exactly this artifact, so it matches what the runner measures.
       - uses: actions/upload-artifact@v7
-        if: matrix.os == 'ubuntu-latest' && always()
+        if: matrix.os == 'ubuntu-latest' && matrix.nvim == 'stable' && always()
         with:
           name: surface-ir
           path: ${{ runner.temp }}/testing-ir.json
@@ -100,7 +111,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: testing-ir-${{ matrix.os }}
+          name: testing-ir-${{ matrix.os }}-${{ matrix.nvim }}
           path: ${{ runner.temp }}/testing-ir.json
           if-no-files-found: ignore
           retention-days: 14
@@ -110,7 +121,7 @@ jobs:
         # this log exists to debug) skips the upload silently.
         if: failure() || cancelled()
         with:
-          name: test-output-test-${{ matrix.os }}
+          name: test-output-test-${{ matrix.os }}-${{ matrix.nvim }}
           path: ${{ runner.temp }}/test-output.log
           if-no-files-found: ignore
           retention-days: 14
