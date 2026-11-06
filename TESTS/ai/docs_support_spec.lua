@@ -53,7 +53,8 @@ describe("docs_support.restore_maps", function()
     assert.is_truthy(map)
     assert.are.equal("probe plain", map.desc)
     assert.are.equal(0, map.expr)
-    assert.are.equal(0, map.replace_keycodes)
+    -- Off is 0 on current Neovim; 0.11's maparg() leaves the key out instead.
+    assert.are.equal(0, map.replace_keycodes or 0)
     assert.are.equal(1, map.silent)
   end)
 
