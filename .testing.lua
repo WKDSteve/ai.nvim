@@ -59,4 +59,23 @@ return {
       },
     },
   },
+  -- The pipeline is derived (`scripts/test.sh ci list`). The GitHub workflow is generated from `workflow`:
+  -- `testing init --workflow=public --force` writes it (testing.nvim docs/WORKFLOW-CI.md), the step
+  -- workflow-in-sync checks it.
+  ci = {
+    workflow = {
+      name = "ai.nvim",
+      layout = "hosted",
+      -- the steps that depend on the platform: the windows and macOS legs run only these
+      platform = { "suite", "conformance" },
+      -- the promised floor: README, docs/requirements.md, doc/ai.txt and health.lua name it, and
+      -- TESTS/ai/min_version_spec.lua keeps them and this leg together
+      min_nvim = { version = "0.11.4", why = "the floor README, docs/requirements.md, doc/ai.txt and health.lua promise" },
+      -- `testing ci land`: a check branch ci/** runs the hosted legs, main moves only once it is green there
+      land = true,
+    },
+    steps = {
+      ["workflow-in-sync"] = { preset = "workflow-in-sync" },
+    },
+  },
 }
