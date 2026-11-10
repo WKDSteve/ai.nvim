@@ -57,7 +57,11 @@ migration is what |ai-attachments| were built for.
   - ollama:  the `ollama` binary on `PATH`, with the daemon running
              (default http://127.0.0.1:11434, override with
              `AI_OLLAMA_HOST` -- deliberately not `OLLAMA_HOST`, which is
-             Ollama's own env var for the *server*'s bind address).
+             Ollama's own env var for the *server*'s bind address). Every
+             request asks for a context window of `ollama.num_ctx` (32768):
+             Ollama's own default can be as low as 4096 and then silently
+             drops the beginning of a longer prompt. A prompt that likely
+             does not fit is warned about before it is sent.
   - ai_desktop:  an ai-desktop server reachable at http://127.0.0.1:8080 (default,
              override with `AI_DESKTOP_HOST`; the old name `LOOMAI_HOST` still
              works, and so does the provider id `loomai`). Last in the default
@@ -158,6 +162,10 @@ DEFAULTS.lua` is the source of truth. >lua
     usage = {
       report = false,                         -- report request metadata to ai-desktop, see |ai-usage|; opt-in
       host = false,                           -- ai-desktop base URL; false = the ai_desktop provider's own
+    },
+
+    ollama = {
+      num_ctx = 32768,                        -- context window every Ollama request asks for; false = Ollama's own default
     },
 
     ui = {
@@ -504,6 +512,8 @@ require("ai").ask({req}, {cb})
                             user, see |ai-policy|
     temperature  number?    sampling temperature; sent by claude, openai,
                             gemini and ollama, ignored by the others
+    num_ctx      integer?   context window in tokens; only `ollama` sends it,
+                            default `config.ollama.num_ctx`
     effort       string?    low, medium, high, xhigh or max; sent only by
                             claude, and only to a model that takes it
     bulk         table?     run under the guard rails for unattended bulk

@@ -16,6 +16,12 @@
 --- backend guessing on its behalf. `capabilities.vision` says the endpoint
 --- has a slot, not that the chosen model reads it -- `llava` does,
 --- `llama3.2` accepts the field and ignores it.
+---
+--- Context window: `req.num_ctx` (filled from `config.ollama.num_ctx` by
+--- `ai.resolve`) goes out as `options.num_ctx`. Without it Ollama uses a
+--- default that depends on the GPU (4096 tokens on a 12 GB card, measured
+--- 2026-11-10) and quietly drops the beginning of a longer prompt instead of
+--- failing; a prompt that likely does not fit is warned about before sending.
 
 require("ai.@types")
 
@@ -68,6 +74,50 @@ function M.available()
   return util.executable("curl") and util.executable("ollama")
 end
 
+---Characters per token used to estimate a prompt's length. Measured on Lua
+---source with a Qwen tokenizer (2026-11-10: 42000 characters = 10800-11900
+---tokens, 3.5-3.9 per token); prose runs longer per token, so 3.5 errs on the
+---side of warning.
+local CHARS_PER_TOKEN = 3.5
+
+---Warn when the prompt likely does not fit `req.num_ctx`. Ollama does not
+---fail such a request: it drops the beginning of the prompt and answers from
+---the rest, which looks like a model that ignored the context. Nothing is
+---checked without a `num_ctx` -- Ollama's own default depends on the GPU.
+---@internal
+---@param req Ai.Request
+local function warn_if_too_long(req)
+  local num_ctx = req.num_ctx
+  if type(num_ctx) ~= "number" then
+    return
+  end
+  local chars = #(req.prompt or "") + #(req.system or "")
+  local estimate = math.ceil(chars / CHARS_PER_TOKEN)
+  if estimate <= num_ctx then
+    return
+  end
+  require("lib.nvim.notify").create("[ai]").warn(
+    ("ollama: the prompt is about %d tokens, more than num_ctx (%d) -- Ollama drops its beginning. "):format(
+      estimate,
+      num_ctx
+    ) .. "Raise `ollama.num_ctx` in the config or send less context."
+  )
+end
+
+---@internal
+---@param req Ai.Request
+---@return table|nil
+local function build_options(req)
+  local options = {}
+  if req.temperature ~= nil then
+    options.temperature = req.temperature
+  end
+  if req.num_ctx ~= nil then
+    options.num_ctx = req.num_ctx
+  end
+  return next(options) and options or nil
+end
+
 ---@internal
 ---@param req Ai.Request
 ---@param stream boolean
@@ -92,7 +142,7 @@ local function build_body(req, stream)
   return vim.json.encode({
     model = req.model or DEFAULT_MODEL,
     messages = messages,
-    options = req.temperature ~= nil and { temperature = req.temperature } or nil,
+    options = build_options(req),
     stream = stream,
   })
 end
@@ -105,6 +155,7 @@ function M.ask(req, cb)
     cb(false, rejected)
     return
   end
+  warn_if_too_long(req)
 
   local timeout_ms = req.timeout_ms or 60000
   local prepare_err = transport.post_json(host(req) .. "/api/chat", {
@@ -148,6 +199,7 @@ function M.stream(req, handlers)
     end
     return nil
   end
+  warn_if_too_long(req)
 
   local timeout_ms = req.timeout_ms or 60000
   local text_parts = {}

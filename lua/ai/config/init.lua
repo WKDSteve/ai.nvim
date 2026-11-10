@@ -162,6 +162,9 @@ local VALUE_SCHEMA = {
   usage = "table",
   ["usage.report"] = "boolean",
   ["usage.host"] = "string|false",
+  -- sent as Ollama's `num_ctx`: 0, a fraction or a string would fail every Ollama request
+  ollama = "table",
+  ["ollama.num_ctx"] = "integer>=1|false",
   log_level = "number",
   ["ui.progress_style"] = { "auto", "notify", "statusline", "echo", "fidget", "float", "kit" },
   ["ui.badge_timeout_ms"] = "number",
@@ -256,7 +259,10 @@ local function value_ok(kind, value)
   if kind == "string|false" then
     return value == false or type(value) == "string"
   end
-  if kind == "integer>=1" then
+  if kind == "integer>=1" or kind == "integer>=1|false" then
+    if value == false and kind == "integer>=1|false" then
+      return true
+    end
     return type(value) == "number" and value >= 1 and value % 1 == 0 and value ~= math.huge
   end
   if kind == "number>=0|false" then

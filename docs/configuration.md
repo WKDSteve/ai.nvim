@@ -25,6 +25,10 @@ require("ai").setup({
     host = false,                             -- ai-desktop base URL; false = the one the ai_desktop provider uses (AI_DESKTOP_HOST, LOOMAI_HOST, http://127.0.0.1:8080)
   },
 
+  ollama = {
+    num_ctx = 32768,                          -- context window every Ollama request asks for; false = Ollama's own default, see "Ollama context window"
+  },
+
   ui = {
     enable = true,
     progress_style = "auto",                  -- "auto" | "notify" | "statusline" | "echo" | "fidget" | "float" | "kit"
@@ -195,6 +199,22 @@ an unknown field (`modell`), a field of the wrong type or a name with
 whitespace is dropped, and `agent = "x"` for an `x` that does not exist
 leaves no agent active -- each is warned about at `setup()` and listed by
 `:checkhealth ai`.
+
+## Ollama context window
+
+Ollama decides the context window per request (`options.num_ctx`). Left to itself it uses a default that
+depends on the GPU -- 4096 tokens on a 12 GB card -- and a longer prompt does not fail: Ollama drops its
+beginning and answers from the rest, which looks like a model that ignored the buffer or the PDF you sent.
+
+- `ollama.num_ctx` (default `32768`) is sent with every Ollama request; a request's own `num_ctx` wins.
+- Keep it fixed. A request with a different value makes Ollama reload the model (seconds to a minute for a
+  large one).
+- More context costs VRAM (the KV cache grows with it). If the model no longer fits on the GPU, Ollama moves
+  part of it to the CPU and gets slower; lower the value then.
+- Before sending, ai.nvim estimates the prompt's length (3.5 characters per token) and warns when it is
+  larger than `num_ctx`. It still sends the request.
+- `false` sends no `num_ctx`: Ollama's own default (or `OLLAMA_CONTEXT_LENGTH` on the server) applies, and
+  nothing is checked.
 
 ## OpenAI-compatible endpoints
 

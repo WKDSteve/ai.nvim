@@ -188,6 +188,13 @@ local function resolve(req)
   end
   resolved.model = resolved.model or agent_model or cfg.model[provider.id]
   resolved.system = resolved.system or agent.system
+  -- Only ollama takes a context window per request; the others have none to set.
+  if provider.id == "ollama" and resolved.num_ctx == nil then
+    local num_ctx = cfg.ollama and cfg.ollama.num_ctx
+    if num_ctx then
+      resolved.num_ctx = num_ctx
+    end
+  end
   local prompt, context_errors = build_prompt(resolved)
   resolved.prompt = prompt
 

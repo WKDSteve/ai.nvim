@@ -20,6 +20,7 @@
 ---@field timeout_ms? integer Request timeout in ms, passed through to lib.nvim.net.curl (default 60000)
 ---@field bulk? Ai.BulkConfig Guard rails for unattended bulk requests (`lua/ai/bulk.lua`)
 ---@field usage? Ai.UsageOptions Usage reporting to a local ai-desktop server (`lua/ai/usage.lua`)
+---@field ollama? Ai.OllamaOptions Options of the `ollama` provider
 ---@field ui? Ai.UiOptions
 ---@field keymaps? Ai.KeymapOptions
 ---@field which_key? Ai.WhichKeyOptions
@@ -33,6 +34,9 @@
 
 ---@class Ai.BulkConfig
 ---@field max_session_chars? integer|false Cap on the characters of all bulk requests (`Ai.Request.bulk`) of one Neovim session; past it a bulk request fails with `bulk_limit`. `false` (default) = no cap.
+
+---@class Ai.OllamaOptions
+---@field num_ctx? integer|false Context window (tokens) every Ollama request asks for, sent as `options.num_ctx` (default 32768). Without it Ollama uses its own default -- as low as 4096 on a smaller GPU -- and silently drops the beginning of a longer prompt. Keep it fixed: a request with another value makes Ollama reload the model. `false` = send none.
 
 ---@class Ai.UsageOptions
 ---@field report? boolean Report one metadata event per request (`POST /usage/events` of ai-desktop: provider, model, stream, outcome, error kind, token counts, duration -- never prompt, system or answer text). `false` (default) = off; it is one extra network request per AI request. Requests to the `ai_desktop` provider are never reported (the server records those itself).
@@ -144,6 +148,7 @@
 ---@field attachments? Ai.Attachment[] Binary payloads sent with the prompt. A provider that cannot carry one fails the request with `"invalid_request"` before sending -- an attachment is never silently dropped.
 ---@field api_key? string Overrides the provider's own env-var lookup for this request only. For an embedding plugin that already has the key in its own config (`pdfport.nvim`'s `claude_api_key`) and must not have to write it into the user's environment to use ai.nvim. Ignored by providers that need no key. **Set `provider` explicitly alongside it** -- a key belongs to one specific API, and under `provider = "auto"` it would be offered to whichever provider resolves first.
 ---@field host? string Overrides a provider's base URL for this request only: `ollama`, `ai_desktop`, and `openai` for an OpenAI-compatible endpoint when `provider = "openai"` (https, or http for localhost, no credentials in the URL; the OpenAI key is never sent there, see `AI_OPENAI_COMPAT_API_KEY`) -- same reasoning as `api_key`. Ignored by the other cloud providers, whose endpoint is not a user choice.
+---@field num_ctx? integer Context window in tokens for this request. Only the `ollama` backend reads it (`options.num_ctx`); when the request leaves it unset, `config.ollama.num_ctx` fills it in. Ignored by the other providers, whose window is fixed by the model.
 ---@field temperature? number Sampling temperature, sent by the providers that take one (`capabilities.temperature`: claude, openai, gemini, ollama); ignored by the others
 ---@field effort? "low"|"medium"|"high"|"xhigh"|"max" How much the model may think and spend on the answer. Only the `claude` backend sends it (`output_config.effort`), and only to a model that takes it (`Ai.Provider.accepts_effort`): a level the model lacks is lowered to the nearest one it has (`xhigh` on Opus 4.6 becomes `high`), an unknown value is dropped; ignored by the other providers
 ---@field bulk? Ai.BulkOptions Run this request under the guard rails for unattended bulk use (`ai.ask` only; see `Ai.BulkOptions`). Not combinable with `allow_unlisted`, `attachments` or `context`.

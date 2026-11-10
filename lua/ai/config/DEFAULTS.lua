@@ -76,6 +76,16 @@ local DEFAULTS = {
     host = false,
   },
 
+  -- Ollama only (see lua/ai/providers/ollama.lua). `num_ctx` is the context
+  -- window every request asks for: without it Ollama picks its own default
+  -- (as low as 4096 tokens, depending on the GPU) and silently drops the
+  -- beginning of a longer prompt -- buffer context, a PDF, a long note. One
+  -- fixed value on purpose: a request with a different `num_ctx` makes Ollama
+  -- reload the model. `false` sends none (Ollama's own default applies).
+  ollama = {
+    num_ctx = 32768,
+  },
+
   ui = {
     enable = true,
     progress_style = "auto",
