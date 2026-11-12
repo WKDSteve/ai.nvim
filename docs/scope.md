@@ -96,6 +96,20 @@ of it the allow-list admits, and a provider outside the list is reachable only
 by a deliberate step (a confirmed `:Ai provider`, or `allow_unlisted` on one
 request).
 
+## A tool call is context, and the caller makes it
+
+`context.mcp = { server, tool, args }` (see [configuration.md](configuration.md)) makes one read-only MCP tool call
+before the request and adds its result to the prompt as text. **The caller names the call; the model never sees a
+tool and cannot ask for one.** That keeps the plugin at exactly one request, with no tool loop: the call is part of
+building the context, like reading a buffer. A manipulated log can bend the answer, but it cannot trigger an action.
+
+`server` is the id of a client the caller created with `lib.nvim.mcp` (stdio or HTTP), so ai.nvim holds no server
+configuration and no credential. `context.mcp_allowed` is a list of `"<server>/<tool>"` entries; empty (the default)
+means no restriction, non-empty means only those calls, and a malformed value refuses every call. The call is awaited
+with a timeout, the result is cut at 20000 characters, and any failure (unknown server or tool, a tool that reports an
+error, a timeout) is an entry in the context's `errors`, never a raised error. Like every AI action it starts only on
+an explicit request.
+
 ## Bulk requests are a leash, not a feature
 
 `req.bulk` ([bulk.md](bulk.md)) gives plugins that send a whole document in many

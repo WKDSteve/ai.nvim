@@ -229,6 +229,10 @@ function M.assemble(opts)
     add_conflict_scope(sections)
   end
 
+  if opts.mcp then
+    require("ai.context.mcp").add(opts.mcp, sections, errors)
+  end
+
   return table.concat(sections, "\n\n"), (#errors > 0 and errors or nil)
 end
 

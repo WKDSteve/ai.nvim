@@ -120,6 +120,12 @@ local DEFAULTS = {
     -- Requires gitsuite.nvim (optional soft dep); silent no-op without it or
     -- outside an unresolved merge conflict. Off by default like the above.
     conflict = false,
+    -- One read-only MCP tool call made by the caller before the request (never by the model): a table
+    -- `{ server = "<lib.nvim.mcp client id>", tool = "...", args = { ... } }`, see docs/scope.md. Off by default.
+    mcp = false,
+    -- `"<server>/<tool>"` entries a `context.mcp` call may name. Empty = no restriction (it narrows, it never
+    -- widens); a malformed value refuses every call.
+    mcp_allowed = {},
   },
 
   -- Inline completion (ghost text). "manual" (default): only the trigger

@@ -59,6 +59,8 @@ require("ai").setup({
     cwd = false,                 -- expensive (a full cwd sweep); off by default
     structured_data = false,     -- flattened json/yaml/xml block under the cursor, via data.nvim (optional soft dep); off by default
     conflict = false,            -- both sides of every unresolved merge conflict, labeled "ours"/"theirs", via gitsuite.nvim (optional soft dep); off by default
+    mcp = false,                 -- one read-only MCP tool call the caller names, { server = "<lib.nvim.mcp client id>", tool = "...", args = {...} }; off by default (see scope.md)
+    mcp_allowed = {},            -- "<server>/<tool>" entries a context.mcp call may name; empty = no restriction (narrows only); malformed = every call refused
   },
 
   -- Inline completion (ghost text at the cursor). "manual" (default): only

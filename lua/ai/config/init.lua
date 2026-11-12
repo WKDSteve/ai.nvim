@@ -21,8 +21,14 @@ local M = {}
 ---one of these names at another nesting level (e.g. `completion.model`, a
 ---single string) still gets checked normally.
 ---@type table<string, true>
-local OPEN_SHAPE_KEYS =
-  { model = true, provider_order = true, ["policy.allowed"] = true, keys = true, agents = true }
+local OPEN_SHAPE_KEYS = {
+  model = true,
+  provider_order = true,
+  ["policy.allowed"] = true,
+  ["context.mcp_allowed"] = true,
+  keys = true,
+  agents = true,
+}
 
 ---Tables in which an unknown key must not be ignored, each with what it
 ---refuses (`effect`) and the table that replaces it (`replace`) when one is
@@ -154,6 +160,7 @@ local VALUE_SCHEMA = {
   agent = "string|false",
   policy = "table",
   ["policy.allowed"] = "string[]",
+  ["context.mcp_allowed"] = "string[]",
   timeout_ms = "number",
   bulk = "table",
   ["bulk.max_session_chars"] = "number>=0|false",
@@ -214,6 +221,12 @@ local FAIL_CLOSED = {
     effect = "every provider is refused",
     replace = function()
       return { allowed = { M.INVALID_ALLOWED } }
+    end,
+  },
+  ["context.mcp_allowed"] = {
+    effect = "every MCP context call is refused",
+    replace = function()
+      return { "<invalid context.mcp_allowed>" }
     end,
   },
   bulk = {

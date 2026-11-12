@@ -102,6 +102,8 @@
 ---@field cwd? boolean Include a harvest.scope("cwd") sweep -- expensive, off by default
 ---@field structured_data? boolean Include the flattened JSON/YAML/XML block under the cursor, via `data.nvim` (optional soft dep) -- off by default
 ---@field conflict? boolean Include both sides of every unresolved merge-conflict region in the buffer, labeled "ours"/"theirs", via `gitsuite.nvim` (optional soft dep) -- off by default
+---@field mcp? Ai.ContextMcp|false One read-only MCP tool call the caller names (`{ server, tool, args }`; `server` is the id of a `lib.nvim.mcp` client the caller created), made before the request and added as text. The model never sees a tool. Off by default
+---@field mcp_allowed? string[] `"<server>/<tool>"` entries a `context.mcp` call may name; empty (default) = no restriction, it only narrows. A malformed value refuses every call
 
 ---@class Ai.CompletionOptions
 ---@field enable? boolean
