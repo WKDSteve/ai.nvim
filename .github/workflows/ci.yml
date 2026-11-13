@@ -91,6 +91,22 @@ jobs:
           repository: WKDSteve/lib.nvim
           path: .deps/lib.nvim
           ref: ci-verified
+      # the real data.nvim describe of TESTS/ai/context_spec.lua (structured_data)
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+          repository: WKDSteve/data.nvim
+          path: .deps/data.nvim
+          # Pinned: a commit whose own CI was green (no ci-verified branch to follow). Bump on purpose.
+          ref: 9afe40f02332c18f16e25a149524fe731d930e28
+      # the real gitsuite.nvim describe of TESTS/ai/context_spec.lua (conflict)
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+          repository: WKDSteve/gitsuite.nvim
+          path: .deps/gitsuite.nvim
+          # Pinned: a commit whose own CI was green (no ci-verified branch to follow). Bump on purpose.
+          ref: dd34a7e72c6c2fa6fe4cff5a3ce6c450a20259f5
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
