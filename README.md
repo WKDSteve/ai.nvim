@@ -89,3 +89,25 @@ each page answers.
 ## License
 
 ai.nvim is released under the [MIT License](https://opensource.org/licenses/MIT) -- see [LICENSE](LICENSE).
+
+<!-- connections:begin (written by the app-icons tool of the workshop; change integrations.json there, not this block) -->
+## Connections
+
+![ai.nvim: what it uses and what uses it](assets/graphs/ai.nvim.png)
+
+**Uses**
+
+- [ai-desktop](https://github.com/WKDSteve/ai-desktop): The `ai_desktop` provider of ai.nvim sends its ask and stream requests (`/ask`, `/ask/stream`) to a local ai-desktop server. ([picture](assets/graphs/pair/ai.nvim--ai-desktop.png))
+- [data.nvim](https://github.com/WKDSteve/data.nvim): With data.nvim installed, ai.nvim can add the structured data around the cursor (JSON, YAML, XML) to the context it sends. ([picture](assets/graphs/pair/ai.nvim--data.nvim.png))
+- [gitsuite.nvim](https://github.com/WKDSteve/gitsuite.nvim): With gitsuite.nvim installed, ai.nvim can add the merge conflict under the cursor to its context (`context.conflict`). ([picture](assets/graphs/pair/ai.nvim--gitsuite.nvim.png))
+- [ui.nvim](https://github.com/WKDSteve/ui.nvim): ai.nvim draws its text prompts and its result viewers with the popup kit of ui.nvim (`ui.kit`). ([picture](assets/graphs/pair/ai.nvim--ui.nvim.png))
+- [lib.nvim](https://github.com/WKDSteve/lib.nvim): the shared base of the plugins.
+
+**Used by**
+
+- [language.nvim](https://github.com/WKDSteve/language.nvim): The translation of language.nvim can use ai.nvim as its engine, and reads its provider and its allow-list policy to decide what may be sent. ([picture](assets/graphs/pair/language.nvim--ai.nvim.png))
+- [pdfport.nvim](https://github.com/WKDSteve/pdfport.nvim): The Claude and Gemini backends of pdfport.nvim send the PDF through the attachments of ai.nvim (`ai.attachments`). ([picture](assets/graphs/pair/pdfport.nvim--ai.nvim.png))
+- [rules.nvim](https://github.com/WKDSteve/rules.nvim): The agent rules of rules.nvim ask ai.nvim (`ai.ask`) to judge a rule when no other transport is given. ([picture](assets/graphs/pair/rules.nvim--ai.nvim.png))
+- [tasks.nvim](https://github.com/WKDSteve/tasks.nvim): `:Tasks sheet-ai ask` sends the hand-over to ai.nvim (`ai.ask`) and puts the answer back into the buffer. ([picture](assets/graphs/pair/tasks.nvim--ai.nvim.png))
+- [testing.nvim](https://github.com/WKDSteve/testing.nvim): A test sheet of testing.nvim can ask ai.nvim to explain a result (`ai.stream`). ([picture](assets/graphs/pair/testing.nvim--ai.nvim.png))
+<!-- connections:end -->
