@@ -19,8 +19,8 @@
 -- inserting a section does not break the lookups.
 ---@diagnostic disable: need-check-nil
 
--- Self-contained: a spec must not depend on how it was started (a plain
--- :PlenaryBustedFile has no TESTS/minimal_init.lua behind it).
+-- Self-contained: a spec must not depend on how it was started (a file run on
+-- its own, without TESTS/minimal_init.lua behind it, still finds its helpers).
 package.path = vim.fn.getcwd() .. "/TESTS/?.lua;" .. package.path
 local S = require("docs_support")
 

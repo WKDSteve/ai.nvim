@@ -18,7 +18,9 @@ return {
   -- "l" = `nvim -l`.
   host = "c",
   -- Environment variables the specs read; a child editor inherits an allowlist only (never secrets).
-  env_allow = { "CLAUDE_CODE_DISABLE_ATTACHMENTS" },
+  -- DATA_NVIM_DIR / GITSUITE_NVIM_DIR: where TESTS/minimal_init.lua finds the optional data.nvim and gitsuite.nvim
+  -- (the worktree of `ci commit` has no sibling checkouts).
+  env_allow = { "CLAUDE_CODE_DISABLE_ATTACHMENTS", "DATA_NVIM_DIR", "GITSUITE_NVIM_DIR" },
   -- Guards (testing.nvim docs/GUARDS.md). The suite passes cleanly for these, so a new finding fails.
   guards = {
     fs = "error",
@@ -70,7 +72,10 @@ return {
       platform = { "suite", "conformance" },
       -- the promised floor: README, docs/requirements.md, doc/ai.txt and health.lua name it, and
       -- TESTS/ai/min_version_spec.lua keeps them and this leg together
-      min_nvim = { version = "0.11.4", why = "the floor README, docs/requirements.md, doc/ai.txt and health.lua promise" },
+      min_nvim = {
+        version = "0.11.4",
+        why = "the floor README, docs/requirements.md, doc/ai.txt and health.lua promise",
+      },
       -- `testing ci land`: a check branch ci/** runs the hosted legs, main moves only once it is green there
       land = true,
     },

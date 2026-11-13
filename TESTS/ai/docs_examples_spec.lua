@@ -19,8 +19,8 @@
 -- TESTS/docs_support.lua, shared with vimdoc_spec.lua.
 ---@diagnostic disable: missing-fields, need-check-nil
 
--- Self-contained: a spec must not depend on how it was started (a plain
--- :PlenaryBustedFile has no TESTS/minimal_init.lua behind it).
+-- Self-contained: a spec must not depend on how it was started (a file run on
+-- its own, without TESTS/minimal_init.lua behind it, still finds its helpers).
 package.path = vim.fn.getcwd() .. "/TESTS/?.lua;" .. package.path
 local S = require("docs_support")
 local DOCS = S.DOCS
