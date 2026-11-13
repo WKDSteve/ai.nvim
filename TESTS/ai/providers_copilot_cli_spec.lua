@@ -302,10 +302,14 @@ describe("ai.providers.copilot", function()
     end)
 
     it("gives every call its own COPILOT_HOME and deletes it afterwards", function()
-      vim.env.COPILOT_HOME = "C:/must/not/be/used"
+      -- a computed path, never a literal like "C:/x": the fake writes into the home it gets,
+      -- and a literal absolute path is a place outside the project the cache key watches
+      local unused = vim.fn.tempname() .. "-must-not-be-used"
+      vim.env.COPILOT_HOME = unused
       local first, second = echo({}), echo({})
       assert.is_truthy(first.home)
-      assert.are_not.equal("C:/must/not/be/used", first.home)
+      assert.are_not.equal(unused, first.home)
+      assert.are.equal(0, vim.fn.isdirectory(unused))
       assert.are_not.equal(first.home, second.home)
       -- the fake wrote a session file there, like the real CLI does
       assert.are.equal(0, vim.fn.isdirectory(first.home))
@@ -326,8 +330,18 @@ describe("ai.providers.copilot", function()
 
     it("uses the real home only when isolate_home is switched off", function()
       cli.isolate_home = false
-      vim.env.COPILOT_HOME = "C:/real/home"
-      assert.are.equal("C:/real/home", echo({}).home)
+      -- the fake writes its session file into this home: it must be a temp directory, never a
+      -- literal like "C:/real/home" (on Windows that wrote C:\real\home outside the project, and
+      -- the cache key, which watched that absent place, changed during the run)
+      local real = vim.fn.tempname() .. "-real-home"
+      vim.env.COPILOT_HOME = real
+      local ok, info = pcall(echo, {})
+      local kept = vim.fn.filereadable(real .. "/session-state/s1/events.jsonl")
+      vim.fn.delete(real, "rf")
+      assert.is_true(ok, tostring(info))
+      assert.are.equal(real, info.home)
+      -- the real home keeps the session: nothing deletes it
+      assert.are.equal(1, kept)
     end)
   end)
 
