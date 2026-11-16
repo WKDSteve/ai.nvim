@@ -348,6 +348,9 @@ local function describe_agent(name, def)
   if def.system then
     parts[#parts + 1] = ("system=%d chars"):format(#def.system)
   end
+  if def.repo_prompt then
+    parts[#parts + 1] = "repo_prompt"
+  end
   return ("%s (%s)"):format(name, #parts > 0 and table.concat(parts, ", ") or "no fields set")
 end
 
@@ -435,6 +438,44 @@ local function unresolved_reason(err)
     end
   end
   return "none available"
+end
+
+---The repository's own prompt file (`ai.repo_prompt`): no `action` shows it for review (path, size, whether
+---this content is trusted, the text itself); `"allow"` trusts exactly the content that was shown; `"forget"`
+---drops the trust record. Nothing is sent anywhere.
+---@param action? "allow"|"forget"
+---@return nil
+function M.trust(action)
+  local notify = require("lib.nvim.notify").create("[ai]")
+  local repo_prompt = require("ai.repo_prompt")
+  if action == "allow" or action == "forget" then
+    local path, err = repo_prompt[action]()
+    if not path then
+      ---@cast err LibErrorValue
+      notify.error(err.message)
+      return
+    end
+    notify.info(
+      action == "allow" and ("trusted: %s (this content; a change needs a new review)"):format(path)
+        or ("no longer trusted: %s"):format(path)
+    )
+    return
+  end
+  local info, err = repo_prompt.show()
+  if not info then
+    ---@cast err LibErrorValue
+    notify.error(err.message)
+    return
+  end
+  local lines = {
+    ("%s (%d bytes)"):format(info.path, #info.text),
+    info.trusted and "trusted: yes, this content"
+      or "trusted: no -- :Ai trust allow trusts exactly what is shown here",
+    "Only an agent with repo_prompt = true sends it, as the system prompt.",
+    "",
+  }
+  vim.list_extend(lines, vim.split(info.text, "\n", { plain = true }))
+  require("ui.kit").popup({ type = "viewer", title = "Ai trust", lines = lines })
 end
 
 ---Show the active provider, the auto-resolution order, and per-provider

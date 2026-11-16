@@ -10,6 +10,7 @@
 :Ai provider <name>               -- switch the active provider, or back to auto (Tab-completes registered ids and auto); outside policy.allowed it asks first, auto never does
 :Ai agent [<name>|none]          -- switch the active agent (a named provider, model and system prompt from config.agents) for this session; no argument shows it, none clears it
 :Ai key [<profile>|reset] [<provider>] -- choose the API-key profile for this session (config.keys); no argument shows the setup
+:Ai trust [allow|forget]         -- the repository's prompt file (.ai.md) for agents with repo_prompt = true: no argument shows it for review, allow trusts exactly the content shown (SHA-256, kept across sessions; a changed file is untrusted again), forget drops the record
 :Ai stop                          -- stop every running stream (the panels' requests); a one-shot ask or an edit has no handle and runs to its end
 :Ai info                          -- active provider (with `provider = "auto"`: the one it resolves to, `auto (-> claude)`, or why none: `none available`, `key missing`, `blocked by policy`; an active agent's provider wins) and agent, resolution order, provider policy, the bulk session cap and grants, per-provider availability and capabilities (and the gateway host under claude-cli while ANTHROPIC_BASE_URL is set)
 ```

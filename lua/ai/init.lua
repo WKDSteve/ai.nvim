@@ -187,7 +187,18 @@ local function resolve(req)
     end
   end
   resolved.model = resolved.model or agent_model or cfg.model[provider.id]
-  resolved.system = resolved.system or agent.system
+  if resolved.system == nil and agent.repo_prompt then
+    -- The repository's own prompt file, only once its content is trusted
+    -- (`ai.repo_prompt`). A missing or untrusted file refuses the request: it
+    -- must not go out without the prompt the agent asks for.
+    local text, perr = require("ai.repo_prompt").load()
+    if not text then
+      return nil, perr, req, nil
+    end
+    resolved.system = agent.system and (agent.system .. "\n\n" .. text) or text
+  else
+    resolved.system = resolved.system or agent.system
+  end
   -- Only ollama takes a context window per request; the others have none to set.
   if provider.id == "ollama" and resolved.num_ctx == nil then
     local num_ctx = cfg.ollama and cfg.ollama.num_ctx

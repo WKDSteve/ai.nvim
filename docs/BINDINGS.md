@@ -44,6 +44,7 @@ see [configuration.md](configuration.md)). They follow the master switch:
 | `:Ai provider <name>` | Switch the active provider, or back to `auto` |
 | `:Ai agent [name\|none]` | Switch the active agent (provider, model, system prompt) for this session |
 | `:Ai key [profile\|reset] [provider]` | Choose the API-key profile for this session |
+| `:Ai trust [allow\|forget]` | Review and trust the repository's prompt file (`.ai.md`) for agents with `repo_prompt` |
 | `:Ai stop` | Stop every running stream |
 | `:Ai info` | Show active provider + availability |
 

@@ -8,6 +8,11 @@
 ---@field provider? string Provider id (or `"auto"`); the request's own `provider` wins
 ---@field model? string Model for that provider; used only when the resolved provider is the agent's own (or the agent names none)
 ---@field system? string System prompt; a request that sets `system` itself (edits do) keeps its own
+---@field repo_prompt? boolean Add the repository's trusted prompt file (`config.repo_prompt`, `:Ai trust`) after `system`; a missing or untrusted file refuses the request
+
+---@class Ai.RepoPromptOptions
+---@field file? string Relative to the project root, may not leave it (default `".ai.md"`)
+---@field max_bytes? integer A larger file is refused, not cut (default 16384)
 
 ---@class Ai.Config
 ---@field provider? string Active provider id, or `"auto"` (default) to pick the first available id in `provider_order`
@@ -17,6 +22,7 @@
 ---@field model? table<string, string> Default model per provider id, e.g. `{ claude = "claude-opus-4-5" }`
 ---@field agents? table<string, Ai.Agent> Named presets of provider, model and system prompt (default `{}`); see `:Ai agent`
 ---@field agent? string|false Name of the active agent from `agents`, `false` (default) = none; changed for the session by `:Ai agent`
+---@field repo_prompt? Ai.RepoPromptOptions The repository's own system-prompt file, for agents with `repo_prompt = true`
 ---@field timeout_ms? integer Request timeout in ms, passed through to lib.nvim.net.curl (default 60000)
 ---@field bulk? Ai.BulkConfig Guard rails for unattended bulk requests (`lua/ai/bulk.lua`)
 ---@field usage? Ai.UsageOptions Usage reporting to a local ai-desktop server (`lua/ai/usage.lua`)

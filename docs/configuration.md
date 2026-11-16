@@ -14,6 +14,10 @@ require("ai").setup({
   model = {},                                 -- e.g. { claude = "claude-opus-4-5" } -- not validated here, see "Model ids" below
   agents = {},                                -- named presets { name = { provider, model, system } }, see "Agents" below
   agent = false,                              -- the agent active at startup, a name from agents; false = none
+  repo_prompt = {
+    file = ".ai.md",                          -- the repository's prompt file, relative to the project root, see "Repository prompt file" below
+    max_bytes = 16384,                        -- a larger file is refused, not cut
+  },
   timeout_ms = 60000,
 
   bulk = {
@@ -201,6 +205,42 @@ an unknown field (`modell`), a field of the wrong type or a name with
 whitespace is dropped, and `agent = "x"` for an `x` that does not exist
 leaves no agent active -- each is warned about at `setup()` and listed by
 `:checkhealth ai`.
+
+## Repository prompt file
+
+A project can bring its own system prompt in a file of its repository, like
+gp.nvim's `.gp.md`: `.ai.md` at the project root by default (the directory
+with `.git` above the current buffer's file; `repo_prompt.file` names another
+path, relative to that root and not leaving it). Only the system-prompt part:
+no hooks, no commands registered from the file, no placeholders (the text goes
+out as it stands, `{{filetype}}` included).
+
+It is never read on its own. An agent asks for it:
+
+```lua
+-- one more agent for the setup() block above
+agents = {
+  project = { provider = "claude", system = "You review code.", repo_prompt = true },
+},
+```
+
+and its content must be trusted first. A file in a repository that instructs a
+model is prompt injection from every clone that carries one, so:
+
+1. `:Ai trust` shows the file for review: path, size, whether this content is
+   trusted, the text. Nothing is sent.
+2. `:Ai trust allow` trusts exactly the content step 1 showed (a file changed in
+   between is refused). The record is the SHA-256 of the content in
+   `stdpath("state")/ai.nvim/repo_prompt_trust.json`, so it lasts across
+   sessions -- and a changed file is untrusted again until it is reviewed.
+3. `:Ai trust forget` drops the record.
+
+A request of that agent then carries the agent's `system`, an empty line and
+the file. With the file missing, larger than `repo_prompt.max_bytes` (default
+16 KiB; refused, not cut) or untrusted, the request is refused with a message
+that names what to do -- it is not sent without the prompt the agent asks for.
+A request with its own system prompt (the in-place edits, the completion) keeps
+it and reads no file.
 
 ## Ollama context window
 

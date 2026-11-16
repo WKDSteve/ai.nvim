@@ -201,6 +201,27 @@ function M.setup()
         end,
       },
       {
+        path = { "trust" },
+        args = {
+          {
+            name = "action",
+            type = "STRING",
+            optional = true,
+            enum = { "allow", "forget" },
+            desc = "Omit to review the repository's prompt file; allow trusts what was shown",
+            enum_desc = {
+              allow = "Trust exactly the content :Ai trust showed",
+              forget = "Drop the trust record of the file",
+            },
+          },
+        },
+        desc = "Review and trust the repository's own prompt file (.ai.md) for agents with repo_prompt",
+        run = function(ctx)
+          warn_if_ranged(ctx)
+          actions.trust(ctx.args.action)
+        end,
+      },
+      {
         path = { "stop" },
         desc = "Stop every running stream (one-shot asks and edits cannot be stopped)",
         run = function(ctx)

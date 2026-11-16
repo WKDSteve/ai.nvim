@@ -162,6 +162,9 @@ local VALUE_SCHEMA = {
   ["policy.allowed"] = "string[]",
   ["context.mcp_allowed"] = "string[]",
   timeout_ms = "number",
+  repo_prompt = "table",
+  ["repo_prompt.file"] = "string",
+  ["repo_prompt.max_bytes"] = "integer>=1",
   bulk = "table",
   ["bulk.max_session_chars"] = "number>=0|false",
   -- `report` reaches a plain `== true` check: a string "true" would silently
@@ -438,7 +441,8 @@ end
 
 ---The fields of one agent preset, and the type each must have.
 ---@type table<string, string>
-local AGENT_FIELDS = { provider = "string", model = "string", system = "string" }
+local AGENT_FIELDS =
+  { provider = "string", model = "string", system = "string", repo_prompt = "boolean" }
 
 ---@internal
 ---Check `opts.agents` and `opts.agent` of the caller's copy, in place: an agent
@@ -470,11 +474,12 @@ local function check_agents(opts, issues)
         for field, value in pairs(def) do
           local kind = AGENT_FIELDS[field]
           if not kind then
-            problem = ("unknown field %q (allowed: provider, model, system)"):format(
+            problem = ("unknown field %q (allowed: provider, model, system, repo_prompt)"):format(
               tostring(field)
             )
           elseif type(value) ~= kind or (kind == "string" and value == "") then
-            problem = ("%s must be a non-empty string"):format(field)
+            problem = kind == "boolean" and ("%s must be true or false"):format(field)
+              or ("%s must be a non-empty string"):format(field)
           end
           if problem then
             break

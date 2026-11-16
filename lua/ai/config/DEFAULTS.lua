@@ -46,12 +46,25 @@ local DEFAULTS = {
   --     local_ = { provider = "ollama", model = "llama3" },
   --   }
   -- Every field is optional; a field a request sets itself always wins.
+  -- `repo_prompt = true` adds the repository's own prompt file (`repo_prompt`
+  -- below) after the agent's `system`, once its content is trusted
+  -- (`:Ai trust`); no agent does by default.
   agents = {},
 
   -- The agent that is active at startup, a name from `agents`; `false` is none.
   -- `:Ai agent <name>` changes it for the running session only (nothing is
   -- persisted, like `:Ai provider`).
   agent = false,
+
+  -- The repository's own system-prompt file, read only for an agent with
+  -- `repo_prompt = true` and only once its content is trusted (`:Ai trust`,
+  -- see lua/ai/repo_prompt.lua). `file` is relative to the project root (the
+  -- directory with `.git` above the current buffer's file) and may not leave
+  -- it; a larger file than `max_bytes` is refused, not cut.
+  repo_prompt = {
+    file = ".ai.md",
+    max_bytes = 16384,
+  },
 
   timeout_ms = 60000,
 
