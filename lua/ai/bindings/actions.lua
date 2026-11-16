@@ -61,26 +61,38 @@ end
 function M.stream_prompt(prompt, context)
   local function run(text)
     local cfg = require("ai").config()
+    -- The context (selection marks, diagnostics) is read from the current buffer when the
+    -- request starts. The panel takes the focus when it opens, so the request starts in the
+    -- window the action came from: read in the panel's buffer, the context was always empty.
+    local source_win = vim.api.nvim_get_current_win()
     local panel = require("ai.ui.panel").open({
       title = "AI",
       theme = cfg.ui.panel_theme,
       progress_style = cfg.ui.progress_style,
     })
-    local process = require("ai").stream({ prompt = text, context = context }, {
-      on_chunk = function(delta)
-        require("ai.ui.panel").append(panel, delta)
-      end,
-      on_done = function(res)
-        require("ai.ui.panel").finish(
-          panel,
-          res.stop_reason and ("[" .. res.stop_reason .. "]") or nil
-        )
-      end,
-      on_error = function(err)
-        require("ai.ui.panel").append(panel, "\n\n[error] " .. err.message)
-        require("ai.ui.panel").finish(panel, "error")
-      end,
-    })
+    local function start()
+      return require("ai").stream({ prompt = text, context = context }, {
+        on_chunk = function(delta)
+          require("ai.ui.panel").append(panel, delta)
+        end,
+        on_done = function(res)
+          require("ai.ui.panel").finish(
+            panel,
+            res.stop_reason and ("[" .. res.stop_reason .. "]") or nil
+          )
+        end,
+        on_error = function(err)
+          require("ai.ui.panel").append(panel, "\n\n[error] " .. err.message)
+          require("ai.ui.panel").finish(panel, "error")
+        end,
+      })
+    end
+    local process
+    if vim.api.nvim_win_is_valid(source_win) and source_win ~= vim.api.nvim_get_current_win() then
+      process = vim.api.nvim_win_call(source_win, start)
+    else
+      process = start()
+    end
     require("ai.ui.panel").attach_process(panel, process)
   end
 
