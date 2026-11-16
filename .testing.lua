@@ -20,7 +20,11 @@ return {
   -- Environment variables the specs read; a child editor inherits an allowlist only (never secrets).
   -- DATA_NVIM_DIR / GITSUITE_NVIM_DIR: where TESTS/minimal_init.lua finds the optional data.nvim and gitsuite.nvim
   -- (the worktree of `ci commit` has no sibling checkouts).
-  env_allow = { "CLAUDE_CODE_DISABLE_ATTACHMENTS", "DATA_NVIM_DIR", "GITSUITE_NVIM_DIR" },
+  -- UI_NVIM_DIR: where TESTS/sheets/_helpers.lua finds ui.nvim for the sheets that press the quick-action keys.
+  env_allow = { "CLAUDE_CODE_DISABLE_ATTACHMENTS", "DATA_NVIM_DIR", "GITSUITE_NVIM_DIR", "UI_NVIM_DIR" },
+  -- A test sheet (TESTS/ai/sheets_spec.lua) is one case that starts a child editor, some of them twice more
+  -- (`restart`); under load that takes longer than the default 10 s.
+  timeouts = { case_ms = 60000, file_ms = 300000 },
   -- Guards (testing.nvim docs/GUARDS.md). The suite passes cleanly for these, so a new finding fails.
   guards = {
     fs = "error",
@@ -79,8 +83,9 @@ return {
       -- `testing ci land`: a check branch ci/** runs the hosted legs, main moves only once it is green there
       land = true,
       -- The optional soft dependencies, below .deps/ where TESTS/minimal_init.lua finds them: without them the real
-      -- integration describes of TESTS/ai/context_spec.lua are pending on every leg. Pinned to a main commit (neither
-      -- repository has a ci-verified branch); move the pin by hand.
+      -- integration describes of TESTS/ai/context_spec.lua are pending on every leg. data.nvim and gitsuite.nvim are
+      -- pinned to a main commit (neither has a ci-verified branch); move the pin by hand. ui.nvim follows its
+      -- ci-verified branch; TESTS/sheets/_helpers.lua finds it there for TESTS/sheets/ai-quick-keys.sheet.lua.
       checkouts = {
         {
           repo = "WKDSteve/data.nvim",
@@ -91,6 +96,11 @@ return {
           repo = "WKDSteve/gitsuite.nvim",
           ref = "dd34a7e72c6c2fa6fe4cff5a3ce6c450a20259f5",
           why = "the real gitsuite.nvim describe of TESTS/ai/context_spec.lua (conflict)",
+        },
+        {
+          repo = "WKDSteve/ui.nvim",
+          ref = "ci-verified",
+          why = "the prompt, viewer, panel and badge of TESTS/sheets/ai-quick-keys.sheet.lua (ui.kit)",
         },
       },
     },

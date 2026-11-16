@@ -107,6 +107,13 @@ jobs:
           path: .deps/gitsuite.nvim
           # Pinned: a commit whose own CI was green (no ci-verified branch to follow). Bump on purpose.
           ref: dd34a7e72c6c2fa6fe4cff5a3ce6c450a20259f5
+      # the prompt, viewer, panel and badge of TESTS/sheets/ai-quick-keys.sheet.lua (ui.kit)
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+          repository: WKDSteve/ui.nvim
+          path: .deps/ui.nvim
+          ref: ci-verified
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false

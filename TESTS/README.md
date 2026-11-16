@@ -46,6 +46,36 @@ touches `ai.ui.panel`/`ai.bindings.actions`/`ai.bindings.keymaps` end-to-end
 through a real `ui.kit.popup`/`ui.kit.surface.open` call -- see "Skipped"
 below for why, and `panel_spec.lua`'s own module doc for how its logic is
 tested instead (stub the seam, not the whole dependency).
+The one exception are the test sheets (next section): their child editors put a real
+`ui.nvim` on their own rtp.
+
+## Test sheets (`TESTS/sheets/`)
+
+The live checks of the live-testing plan that do not need a real provider are
+test sheets of testing.nvim (`docs/SHEETS.md` there): data files that drive a
+child editor with a UI attached, type the real keys and read the screen.
+`TESTS/ai/sheets_spec.lua` runs each one as a case `sheet:<id>` of the suite;
+one sheet alone: `testing sheets run --sheet <id> --root .`.
+
+- `ai-completion-ghost` -- the trigger key shows the ghost text (dimmed),
+  `<Tab>` accepts it (text and cursor, one line or three), `<C-]>` and typing
+  drop it, `<Tab>` with the built-in popup menu open does not write it.
+- `ai-completion-modes` -- `trigger = "manual"`, `"auto"` (one request after
+  the typing pause) and `enable = false` (no keys, `<Tab>` is a tab), each with
+  what `:checkhealth ai` says about it.
+- `ai-quick-keys` -- `<leader>aa`/`as`/`ae` in Normal and Visual mode with the
+  real `ui.nvim`: the selected lines and the diagnostics go along. It found
+  that `<leader>as` read its context in the stream panel, which had just taken
+  the focus, and so never sent any (`actions_stream_spec.lua` keeps the fix).
+  Needs `ui.nvim` (`$UI_NVIM_DIR`, `.deps/ui.nvim`, a sibling checkout or the
+  lazy.nvim directory; CI checks it out), else it is a reported skip.
+
+No sheet reaches a provider: `TESTS/sheets/_helpers.lua` registers a stand-in
+provider `sheet` that answers asynchronously and records each request. The
+live sheets (`ai-live-claude`, `ai-live-openai`, `ai-live-gemini`,
+`completion-thinking-tokens`) are the exception: real keys and the real API,
+so they are a reported skip in the suite and run only by hand with
+`testing sheets run --live --sheet <id> --root .` (never on CI).
 
 The two documentation specs are the odd ones out: they test the *documentation*
 (REL-08), not the code. Both read the docs at run time and diff them against the
@@ -295,6 +325,9 @@ Skipped, with reasons:
   telescope/fzf-lua/snacks actually rendering) to exercise end-to-end.
   Consistent with `TESTS/minimal_init.lua`'s own existing note on why
   `ui.nvim` isn't added to the rtp here.
+  End to end, the quick-action keys are now pressed by the test sheet
+  `ai-quick-keys` (above) with the real `ui.nvim`, and
+  `actions_stream_spec.lua` pins where `stream_prompt` reads its context.
 - The real network call inside `curl.fetch_json`/`curl.fetch_stream` itself
   (an actual request to Anthropic/OpenAI/Google/a local Ollama or ai-desktop
   server) -- real external process, stubbed at the `lib.nvim.net.curl` seam
