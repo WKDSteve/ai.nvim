@@ -105,6 +105,7 @@ ai.nvim is released under the [MIT License](https://opensource.org/licenses/MIT)
 
 **Used by**
 
+- [filetree.nvim](https://github.com/WKDSteve/filetree.nvim): With ai.nvim installed, the AI bar of the own tree of filetree.nvim sends a typed or spoken request about the files to `ai.ask`. ([picture](assets/graphs/pair/filetree.nvim--ai.nvim.png))
 - [language.nvim](https://github.com/WKDSteve/language.nvim): The translation of language.nvim can use ai.nvim as its engine, and reads its provider and its allow-list policy to decide what may be sent. ([picture](assets/graphs/pair/language.nvim--ai.nvim.png))
 - [pdfport.nvim](https://github.com/WKDSteve/pdfport.nvim): The Claude and Gemini backends of pdfport.nvim send the PDF through the attachments of ai.nvim (`ai.attachments`). ([picture](assets/graphs/pair/pdfport.nvim--ai.nvim.png))
 - [rules.nvim](https://github.com/WKDSteve/rules.nvim): The agent rules of rules.nvim ask ai.nvim (`ai.ask`) to judge a rule when no other transport is given. ([picture](assets/graphs/pair/rules.nvim--ai.nvim.png))
