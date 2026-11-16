@@ -12,7 +12,7 @@ return {
   live = {
     env = { "GEMINI_API_KEY" },
     hosts = { "generativelanguage.googleapis.com" },
-    cost = "three short requests (the default model, at most 150 output tokens), one of them refused: well under a cent",
+    cost = "three short requests (the default model, at most 2048 output tokens, room for thinking), one of them refused: about a cent",
   },
   steps = {
     {
@@ -28,7 +28,7 @@ return {
     },
     {
       lua = [[
-        require("ai").ask({ prompt = "Reply with exactly the word: PONG", max_tokens = 50 }, function(ok, res)
+        require("ai").ask({ prompt = "Reply with exactly the word: PONG", max_tokens = 1024 }, function(ok, res)
           vim.g.live = vim.tbl_extend("force", vim.g.live, {
             ask_ok = ok,
             ask = ok and res.text or tostring(type(res) == "table" and res.message or res),
@@ -46,7 +46,7 @@ return {
     {
       lua = [[
         vim.g.chunks = 0
-        require("ai").stream({ prompt = "Count from 1 to 5, one number per line", max_tokens = 100 }, {
+        require("ai").stream({ prompt = "Count from 1 to 5, one number per line", max_tokens = 1024 }, {
           on_chunk = function()
             vim.g.chunks = vim.g.chunks + 1
           end,
