@@ -80,6 +80,12 @@ end
 ---side of warning.
 local CHARS_PER_TOKEN = 3.5
 
+---At most one too-long warning in this many milliseconds.
+local WARN_INTERVAL_MS = 30000
+
+---@type integer|nil `vim.uv.now()` of the last too-long warning
+local last_warned_at = nil
+
 ---Warn when the prompt likely does not fit `req.num_ctx`. Ollama does not
 ---fail such a request: it drops the beginning of the prompt and answers from
 ---the rest, which looks like a model that ignored the context. Nothing is
@@ -96,6 +102,12 @@ local function warn_if_too_long(req)
   if estimate <= num_ctx then
     return
   end
+  -- A bulk request sends many chunks in a row; one warning says it, one per chunk would bury the editor.
+  local now = vim.uv.now()
+  if last_warned_at and now - last_warned_at < WARN_INTERVAL_MS then
+    return
+  end
+  last_warned_at = now
   require("lib.nvim.notify").create("[ai]").warn(
     ("ollama: the prompt is about %d tokens, more than num_ctx (%d) -- Ollama drops its beginning. "):format(
       estimate,
@@ -114,6 +126,10 @@ local function build_options(req)
   end
   if req.num_ctx ~= nil then
     options.num_ctx = req.num_ctx
+  end
+  -- Ollama's name for the response-length cap; without it the inline completion's 512 meant nothing here.
+  if req.max_tokens ~= nil then
+    options.num_predict = req.max_tokens
   end
   return next(options) and options or nil
 end

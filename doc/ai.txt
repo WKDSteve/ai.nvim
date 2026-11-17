@@ -210,7 +210,7 @@ DEFAULTS.lua` is the source of truth. >lua
       trigger = "manual",        -- "manual"|"auto"
       idle_ms = 500,              -- auto-mode idle debounce
       max_context_lines = 60,
-      max_tokens = 512,            -- claude only; cut-off answers are discarded
+      max_tokens = 512,            -- claude, ollama (num_predict); cut-off answers are discarded
       effort = "low",              -- claude only; false = none
       provider = false,            -- overrides `provider`, completion only; false = unset
       model = false,
@@ -530,7 +530,7 @@ require("ai").ask({req}, {cb})
     context      table?     `Ai.ContextDefaults`, see |ai-context|
     timeout_ms   integer?   overrides config.timeout_ms
     system       string?    system prompt, provider-dependent
-    max_tokens   integer?   response-length cap; only `claude` needs one
+    max_tokens   integer?   response-length cap; read by `claude` and `ollama`
     attachments  table?     `Ai.Attachment[]`, see |ai-attachments|
     api_key      string?    overrides the provider's env-var lookup, this
                             request only -- set `provider` explicitly with

@@ -116,7 +116,7 @@
 ---@field trigger? "manual"|"auto" `"manual"` (default): only an explicit keymap fires a suggestion. `"auto"`: an idle-while-typing timer fires one too -- pick this deliberately, it means an API call (possibly a paid cloud one) on every typing pause, not just on deliberate action.
 ---@field idle_ms? integer Auto-mode idle debounce before firing, in ms (default 500). Unused in `"manual"` mode.
 ---@field max_context_lines? integer Lines of buffer context to include before/after the cursor (default 60)
----@field max_tokens? integer Response-length cap of a completion request (default 512, a whole number >= 1; only `claude` reads it): a ghost suggestion is short, and an answer cut off at the cap is discarded, never shown
+---@field max_tokens? integer Response-length cap of a completion request (default 512, a whole number >= 1; read by `claude` and by `ollama` as `num_predict`): a ghost suggestion is short, and an answer cut off at the cap is discarded, never shown
 ---@field effort? "low"|"medium"|"high"|"xhigh"|"max"|false Effort sent with a completion request (default "low", for latency; `false` sends none); only where the provider and model take one, a level the model lacks is lowered to the nearest one it has
 ---@field provider? string|false Overrides `config.provider` for completion requests only; `false` (default) = unset
 ---@field model? string|false Overrides the resolved provider's default model for completion requests only; `false` (default) = unset
@@ -151,7 +151,7 @@
 ---@field context? Ai.ContextDefaults|table Explicit context flags for this request; a prebuilt context string can also be prepended into `prompt` by the caller
 ---@field provider? string Provider id, or `"auto"` (default: `require("ai").config().provider`)
 ---@field model? string Overrides the provider's default model for this request
----@field max_tokens? integer Overrides the provider's default response-length cap for this request. Only the `claude` backend reads it today (Anthropic's Messages API requires `max_tokens` on every request); ignored by providers that don't need one.
+---@field max_tokens? integer Overrides the provider's default response-length cap for this request. Read by the `claude` backend (Anthropic's Messages API requires `max_tokens` on every request) and by `ollama` (sent as `options.num_predict`); ignored by the others.
 ---@field timeout_ms? integer
 ---@field attachments? Ai.Attachment[] Binary payloads sent with the prompt. A provider that cannot carry one fails the request with `"invalid_request"` before sending -- an attachment is never silently dropped.
 ---@field api_key? string Overrides the provider's own env-var lookup for this request only. For an embedding plugin that already has the key in its own config (`pdfport.nvim`'s `claude_api_key`) and must not have to write it into the user's environment to use ai.nvim. Ignored by providers that need no key. **Set `provider` explicitly alongside it** -- a key belongs to one specific API, and under `provider = "auto"` it would be offered to whichever provider resolves first.

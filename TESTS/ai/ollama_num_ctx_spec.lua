@@ -201,5 +201,18 @@ describe("ollama num_ctx", function()
       require("ai.providers.ollama").ask({ prompt = string.rep("x", 400000) }, function() end)
       assert.are.same({}, warned)
     end)
+
+    it("warns once for a run of long requests (a bulk request sends many chunks)", function()
+      local ollama = require("ai.providers.ollama")
+      for _ = 1, 5 do
+        ollama.ask({ prompt = string.rep("x", 4000), num_ctx = 1024 }, function() end)
+      end
+      assert.are.equal(1, #warned)
+    end)
+
+    it("sends max_tokens as options.num_predict", function()
+      require("ai.providers.ollama").ask({ prompt = "hi", max_tokens = 512 }, function() end)
+      assert.are.same({ num_predict = 512 }, body.options)
+    end)
   end)
 end)
