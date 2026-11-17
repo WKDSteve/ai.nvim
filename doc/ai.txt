@@ -211,7 +211,7 @@ DEFAULTS.lua` is the source of truth. >lua
       idle_ms = 500,              -- auto-mode idle debounce
       max_context_lines = 60,
       max_tokens = 512,            -- claude, ollama (num_predict); cut-off answers are discarded
-      effort = "low",              -- claude only; false = none
+      effort = "low",              -- claude; ollama: "low" = no thinking; false = none
       provider = false,            -- overrides `provider`, completion only; false = unset
       model = false,
       keymap = {
@@ -545,8 +545,9 @@ require("ai").ask({req}, {cb})
                             gemini and ollama, ignored by the others
     num_ctx      integer?   context window in tokens; only `ollama` sends it,
                             default `config.ollama.num_ctx`
-    effort       string?    low, medium, high, xhigh or max; sent only by
-                            claude, and only to a model that takes it
+    effort       string?    low, medium, high, xhigh or max; claude sends it
+                            to a model that takes it, ollama turns low into
+                            think = false
     bulk         table?     run under the guard rails for unattended bulk
                             use, see |ai-bulk|; `ask` then returns a handle
 

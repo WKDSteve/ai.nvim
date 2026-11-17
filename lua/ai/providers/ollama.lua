@@ -155,12 +155,19 @@ local function build_body(req, stream)
     user.images = images
   end
   messages[#messages + 1] = user
-  return vim.json.encode({
+  local body = {
     model = req.model or DEFAULT_MODEL,
     messages = messages,
     options = build_options(req),
     stream = stream,
-  })
+  }
+  -- effort "low" (the inline completion's default) switches a thinking model's thinking off: with a cap of 512
+  -- tokens qwen3.6 spent all of them thinking and answered with nothing (measured 2026-11-17). Other levels send
+  -- nothing, the model's own default; `think = false` is accepted by models without thinking too.
+  if req.effort == "low" then
+    body.think = false
+  end
+  return vim.json.encode(body)
 end
 
 ---@param req Ai.Request

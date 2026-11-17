@@ -78,7 +78,7 @@ require("ai").setup({
     idle_ms = 500,                -- auto-mode idle debounce; unused in "manual"
     max_context_lines = 60,       -- buffer lines included before/after the cursor
     max_tokens = 512,             -- response cap (claude, ollama as num_predict); an answer cut off at the cap is discarded, never shown
-    effort = "low",               -- "low"|"medium"|"high"|"xhigh"|"max"|false (none); claude only, lowered to what the model takes
+    effort = "low",               -- "low"|"medium"|"high"|"xhigh"|"max"|false (none); claude (lowered to what the model takes); ollama: "low" switches thinking off
     provider = false,               -- overrides `provider` for completion requests only; `false` = unset
     model = false,
     keymap = {

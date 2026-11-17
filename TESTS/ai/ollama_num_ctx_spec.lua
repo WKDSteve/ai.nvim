@@ -214,5 +214,23 @@ describe("ollama num_ctx", function()
       require("ai.providers.ollama").ask({ prompt = "hi", max_tokens = 512 }, function() end)
       assert.are.same({ num_predict = 512 }, body.options)
     end)
+
+    it(
+      "turns thinking off for effort low (a capped completion must not spend its tokens thinking)",
+      function()
+        require("ai.providers.ollama").ask(
+          { prompt = "hi", max_tokens = 512, effort = "low" },
+          function() end
+        )
+        assert.is_false(body.think)
+      end
+    )
+
+    it("sends no think field for other levels or without effort", function()
+      require("ai.providers.ollama").ask({ prompt = "hi", effort = "high" }, function() end)
+      assert.is_nil(body.think)
+      require("ai.providers.ollama").ask({ prompt = "hi" }, function() end)
+      assert.is_nil(body.think)
+    end)
   end)
 end)
