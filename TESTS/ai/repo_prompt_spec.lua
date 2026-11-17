@@ -245,6 +245,41 @@ describe("ai.repo_prompt", function()
       assert.are.equal("repo_prompt_untrusted", select(2, rp.load()).kind)
     end)
 
+    it("a store that cannot be written is reported, and nothing is trusted", function()
+      write(root .. "/.ai.md", "Answer in German.")
+      -- the store's directory is a file: the write fails
+      write(vim.fs.dirname(store) .. "/blocker", "x")
+      store = vim.fs.dirname(store) .. "/blocker/trust.json"
+      local rp = setup()
+      rp.show()
+      local path, err = rp.allow()
+      assert.is_nil(path)
+      assert.are.equal("repo_prompt_store", err.kind)
+      assert.are.equal("repo_prompt_untrusted", select(2, rp.load()).kind)
+      store = vim.fs.dirname(vim.fs.dirname(store)) .. "/trust.json"
+    end)
+
+    it(
+      "a broken store is kept as .corrupt before a new one is written, and no temp file stays",
+      function()
+        write(root .. "/.ai.md", "Answer in German.")
+        write(store, "{ not json")
+        local rp = setup()
+        rp.show()
+        assert.are.equal(root .. "/.ai.md", rp.allow())
+        local f = assert(io.open(store .. ".corrupt", "rb"))
+        assert.are.equal("{ not json", f:read("*a"))
+        f:close()
+        assert.are.equal("Answer in German.", rp.load())
+        local names = {}
+        for name in vim.fs.dir(vim.fs.dirname(store)) do
+          names[#names + 1] = name
+        end
+        table.sort(names)
+        assert.are.same({ "trust.json", "trust.json.corrupt" }, names)
+      end
+    )
+
     it("a broken store trusts nothing", function()
       write(root .. "/.ai.md", "Answer in German.")
       write(store, "{ not json")

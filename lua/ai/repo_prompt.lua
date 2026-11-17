@@ -44,33 +44,50 @@ function M.store_path()
 end
 
 ---@internal
----@return table<string, string> sha256 per absolute file path
+---@return table<string, string> data sha256 per resolved file path
+---@return boolean corrupt the store exists but is no JSON object (it then trusts nothing: fail closed)
 local function read_store()
   local f = io.open(M.store_path(), "rb")
   if not f then
-    return {}
+    return {}, false
   end
   local raw = f:read("*a")
   f:close()
   local ok, data = pcall(vim.json.decode, raw)
-  -- an unreadable store trusts nothing (fail closed), it is not repaired here
-  return ok and type(data) == "table" and data or {}
+  if ok and type(data) == "table" then
+    return data, false
+  end
+  return {}, true
 end
 
 ---@internal
+---Write the store atomically (a sibling temp file renamed over it: a crash or a full disk leaves the old store or
+---the new one, never half of one). A store that could not be read is kept as `<store>.corrupt` first, so the
+---records it held are not silently replaced by the one being written. `data` was read right before, so a second
+---Neovim that wrote meanwhile loses at most what it wrote in that moment.
 ---@param data table<string, string>
+---@param corrupt boolean what `read_store()` said
 ---@return boolean ok
 ---@return string|nil err
-local function write_store(data)
+local function write_store(data, corrupt)
   local path = M.store_path()
-  vim.fn.mkdir(vim.fs.dirname(path), "p")
-  local f, err = io.open(path, "wb")
-  if not f then
-    return false, err
+  if corrupt then
+    local ok, err = vim.uv.fs_rename(path, path .. ".corrupt")
+    if not ok then
+      return false,
+        ("the unreadable store could not be kept as %s.corrupt: %s"):format(path, tostring(err))
+    end
+    require("lib.nvim.notify").create("[ai]").warn(
+      ("the trust store could not be read; it is kept as %s.corrupt and a new one is started"):format(
+        path
+      )
+    )
   end
-  f:write(vim.json.encode(vim.tbl_isempty(data) and vim.empty_dict() or data))
-  f:close()
-  return true
+  return require("lib.nvim.fs.write.atomic")(
+    path,
+    vim.json.encode(vim.tbl_isempty(data) and vim.empty_dict() or data),
+    { mkdirp = true }
+  )
 end
 
 ---@internal
@@ -299,9 +316,9 @@ function M.allow(bufnr)
         { path = path }
       )
   end
-  local data = read_store()
+  local data, corrupt = read_store()
   data[key] = hash
-  local ok, werr = write_store(data)
+  local ok, werr = write_store(data, corrupt)
   if not ok then
     return nil,
       lib_error.new(
@@ -329,10 +346,10 @@ function M.forget(bufnr)
   local key = vim.uv.fs_realpath(path)
   key = key and vim.fs.normalize(key) or path
   shown[key] = nil
-  local data = read_store()
+  local data, corrupt = read_store()
   if data[key] ~= nil then
     data[key] = nil
-    local ok, werr = write_store(data)
+    local ok, werr = write_store(data, corrupt)
     if not ok then
       return nil,
         lib_error.new(

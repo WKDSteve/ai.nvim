@@ -234,7 +234,9 @@ model is prompt injection from every clone that carries one, so:
 2. `:Ai trust allow` trusts exactly the content step 1 showed (a file changed in
    between is refused). The record is the SHA-256 of the content in
    `stdpath("state")/ai.nvim/repo_prompt_trust.json`, so it lasts across
-   sessions -- and a changed file is untrusted again until it is reviewed.
+   sessions -- and a changed file is untrusted again until it is reviewed. The
+   store is written atomically; one that cannot be read trusts nothing and is
+   kept as `repo_prompt_trust.json.corrupt` when the next record is written.
 3. `:Ai trust forget` drops the record.
 
 A request of that agent then carries the agent's `system`, an empty line and
