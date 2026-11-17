@@ -31,6 +31,12 @@ local shown = {}
 local last_shown = nil
 
 ---@internal
+---The project root each path of `locate()` was found under: `read()` checks that the file, links resolved, stays
+---inside it.
+---@type table<string, string>
+local root_of = {}
+
+---@internal
 ---Where the trust records live; a function so a spec can point it at a temp file.
 ---@return string
 function M.store_path()
@@ -118,7 +124,27 @@ function M.locate(bufnr)
         { start = start }
       )
   end
-  return vim.fs.normalize(vim.fs.joinpath(root, name))
+  local path = vim.fs.normalize(vim.fs.joinpath(root, name))
+  root_of[path] = root
+  return path
+end
+
+---@internal
+---@param p string
+---@return string normalized, and on Windows lower-cased (its file names compare without case)
+local function comparable(p)
+  local n = vim.fs.normalize(p)
+  return vim.fn.has("win32") == 1 and n:lower() or n
+end
+
+---@internal
+---Whether `real` (links resolved) lies inside `real_root`.
+---@param real string
+---@param real_root string
+---@return boolean
+local function inside(real, real_root)
+  local file, dir = comparable(real), comparable(real_root):gsub("/+$", "")
+  return file:sub(1, #dir + 1) == dir .. "/"
 end
 
 ---@internal
@@ -139,14 +165,18 @@ local function target(bufnr)
 end
 
 ---@internal
----Read the file, within the size cap.
----@param path string
+---Read the file, within the size cap and inside the project root with every link resolved: a `.ai.md` (or a
+---directory on its way) that links to `~/.netrc` must not send that file. The trust record is kept under the
+---resolved path, so a junction or another spelling of the same file is the same file.
+---@param path string from `locate()`
 ---@return string|nil text
 ---@return LibErrorValue|nil err
+---@return string|nil key the resolved path, the key of the trust record
 local function read(path)
   local cfg = require("ai").config()
   local max = cfg.repo_prompt and cfg.repo_prompt.max_bytes or 16384
-  local stat = vim.uv.fs_stat(path)
+  local real = vim.uv.fs_realpath(path)
+  local stat = real and vim.uv.fs_stat(real)
   if not stat or stat.type ~= "file" then
     return nil,
       lib_error.new(
@@ -155,6 +185,16 @@ local function read(path)
         { path = path }
       )
   end
+  local real_root = root_of[path] and vim.uv.fs_realpath(root_of[path])
+  if not real_root or not inside(real, real_root) then
+    return nil,
+      lib_error.new(
+        "repo_prompt_invalid_path",
+        ("ai: %s resolves to %s, outside the project root -- it is not read"):format(path, real),
+        { path = path, real = real }
+      )
+  end
+  real = vim.fs.normalize(real)
   local function too_large(size)
     return nil,
       lib_error.new(
@@ -171,7 +211,7 @@ local function read(path)
   if stat.size > max then
     return too_large(stat.size)
   end
-  local f = io.open(path, "rb")
+  local f = io.open(real, "rb")
   if not f then
     return nil,
       lib_error.new("repo_prompt_missing", ("ai: %s cannot be read"):format(path), { path = path })
@@ -181,7 +221,7 @@ local function read(path)
   if #text > max then
     return too_large(#text)
   end
-  return text
+  return text, nil, real
 end
 
 ---The trusted prompt text of the repository of `bufnr`, or why there is none.
@@ -193,11 +233,11 @@ function M.load(bufnr)
   if not path then
     return nil, err
   end
-  local text, rerr = read(path)
+  local text, rerr, key = read(path)
   if not text then
     return nil, rerr
   end
-  local trusted = read_store()[path]
+  local trusted = read_store()[key]
   if trusted ~= vim.fn.sha256(text) then
     return nil,
       lib_error.new(
@@ -222,14 +262,14 @@ function M.show(bufnr)
   if not path then
     return nil, err
   end
-  local text, rerr = read(path)
+  local text, rerr, key = read(path)
   if not text then
     return nil, rerr
   end
   local hash = vim.fn.sha256(text)
-  shown[path] = hash
+  shown[key] = hash
   last_shown = path
-  return { path = path, text = text, trusted = read_store()[path] == hash }
+  return { path = path, text = text, trusted = read_store()[key] == hash }
 end
 
 ---Trust the content of the repository's prompt file that `show()` returned this session (from a buffer that is no
@@ -243,24 +283,24 @@ function M.allow(bufnr)
   if not path then
     return nil, err
   end
-  local text, rerr = read(path)
+  local text, rerr, key = read(path)
   if not text then
     return nil, rerr
   end
   local hash = vim.fn.sha256(text)
-  if shown[path] == nil or shown[path] ~= hash then
+  if shown[key] == nil or shown[key] ~= hash then
     return nil,
       lib_error.new(
         "repo_prompt_unreviewed",
         ("ai: %s was %s -- review it with :Ai trust first"):format(
           path,
-          shown[path] and "changed since :Ai trust showed it" or "not shown yet this session"
+          shown[key] and "changed since :Ai trust showed it" or "not shown yet this session"
         ),
         { path = path }
       )
   end
   local data = read_store()
-  data[path] = hash
+  data[key] = hash
   local ok, werr = write_store(data)
   if not ok then
     return nil,
@@ -285,10 +325,13 @@ function M.forget(bufnr)
   if not path then
     return nil, err
   end
-  shown[path] = nil
+  -- the resolved path is the key; a file that is gone has none, its record is under the path it had
+  local key = vim.uv.fs_realpath(path)
+  key = key and vim.fs.normalize(key) or path
+  shown[key] = nil
   local data = read_store()
-  if data[path] ~= nil then
-    data[path] = nil
+  if data[key] ~= nil then
+    data[key] = nil
     local ok, werr = write_store(data)
     if not ok then
       return nil,

@@ -211,7 +211,9 @@ leaves no agent active -- each is warned about at `setup()` and listed by
 A project can bring its own system prompt in a file of its repository, like
 gp.nvim's `.gp.md`: `.ai.md` at the project root by default (the directory
 with `.git` above the current buffer's file; `repo_prompt.file` names another
-path, relative to that root and not leaving it). Only the system-prompt part:
+path, relative to that root and not leaving it -- also not through a link: a
+`.ai.md`, or a directory on its way, that links out of the root is refused).
+Only the system-prompt part:
 no hooks, no commands registered from the file, no placeholders (the text goes
 out as it stands, `{{filetype}}` included).
 

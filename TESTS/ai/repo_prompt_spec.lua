@@ -105,6 +105,71 @@ describe("ai.repo_prompt", function()
       assert.are.equal("repo_prompt_no_root", err.kind)
     end)
 
+    describe("links", function()
+      local outside
+
+      ---A link, or `pending` where the machine cannot make one (Windows without Developer Mode).
+      ---@return boolean made
+      local function link(target, at, dir)
+        local ok = vim.uv.fs_symlink(target, at, dir and { dir = true } or nil)
+        if not ok then
+          pending("this machine cannot make a symbolic link (Windows needs Developer Mode)")
+        end
+        return ok == true
+      end
+
+      before_each(function()
+        local tmp = vim.fn.tempname()
+        vim.fn.mkdir(tmp, "p")
+        outside = vim.fs.normalize(assert(vim.uv.fs_realpath(tmp)))
+      end)
+
+      after_each(function()
+        vim.fn.delete(outside, "rf")
+      end)
+
+      it("a prompt file that links out of the root is refused, not read", function()
+        write(outside .. "/secret", "the netrc")
+        if not link(outside .. "/secret", root .. "/.ai.md") then
+          return
+        end
+        local rp = setup()
+        local info, err = rp.show()
+        assert.is_nil(info)
+        assert.are.equal("repo_prompt_invalid_path", err.kind)
+        assert.is_truthy(err.message:find("outside the project root", 1, true))
+        assert.is_falsy(err.message:find("the netrc", 1, true))
+      end)
+
+      it("a directory on the way that links out of the root is refused", function()
+        write(outside .. "/prompt.md", "the netrc")
+        if not link(outside, root .. "/docs", true) then
+          return
+        end
+        local rp = setup({ repo_prompt = { file = "docs/prompt.md" } })
+        local _, err = rp.load()
+        assert.are.equal("repo_prompt_invalid_path", err.kind)
+      end)
+
+      it(
+        "a link that stays inside the root is read, and trusted under the resolved path",
+        function()
+          write(root .. "/sub/prompt.md", "Answer in German.")
+          if not link(root .. "/sub/prompt.md", root .. "/.ai.md") then
+            return
+          end
+          local rp = setup()
+          assert.are.equal("Answer in German.", rp.show().text)
+          rp.allow()
+          assert.are.equal("Answer in German.", rp.load())
+          local f = assert(io.open(store, "rb"))
+          local data = vim.json.decode(f:read("*a"))
+          f:close()
+          assert.is_not_nil(data[root .. "/sub/prompt.md"])
+        end
+      )
+    end)
+
     it("a missing file is an error, not an empty prompt", function()
       local rp = setup()
       local text, err = rp.load()

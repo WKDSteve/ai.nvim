@@ -379,10 +379,11 @@ MISSING: reason".
 :Ai trust [allow|forget]                                        *:Ai-trust*
   The repository's own system-prompt file (`repo_prompt.file`, default
   `.ai.md` at the project root: the directory with `.git` above the current
-  buffer's file). Only an agent with `repo_prompt = true` sends it, after the
-  agent's `system`; no agent does by default. A file in a repository that
-  instructs a model is prompt injection from every clone that carries one,
-  so its content must be trusted first:
+  buffer's file; the file, links resolved, must lie inside it). Only an agent
+  with `repo_prompt = true` sends it, after the agent's `system`; no agent
+  does by default. A file in a repository that instructs a model is prompt
+  injection from every clone that carries one, so its content must be
+  trusted first:
   - no argument shows the file for review: path, size, whether this content
     is trusted, the text. Nothing is sent.
   - `allow` trusts exactly the content `:Ai trust` showed this session (a

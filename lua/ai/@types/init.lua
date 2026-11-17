@@ -11,7 +11,7 @@
 ---@field repo_prompt? boolean Add the repository's trusted prompt file (`config.repo_prompt`, `:Ai trust`) after `system`; a missing or untrusted file refuses the request
 
 ---@class Ai.RepoPromptOptions
----@field file? string Relative to the project root, may not leave it (default `".ai.md"`)
+---@field file? string Relative to the project root, may not leave it, not through a link either (default `".ai.md"`)
 ---@field max_bytes? integer A larger file is refused, not cut (default 16384)
 
 ---@class Ai.Config
