@@ -69,12 +69,21 @@ one sheet alone: `testing sheets run --sheet <id> --root .`.
   the focus, and so never sent any (`actions_stream_spec.lua` keeps the fix).
   Needs `ui.nvim` (`$UI_NVIM_DIR`, `.deps/ui.nvim`, a sibling checkout or the
   lazy.nvim directory; CI checks it out), else it is a reported skip.
+- `ai-trust-review` -- the repository prompt file with the real `ui.nvim`
+  viewer: `:Ai trust` shows `.ai.md`, `:Ai trust allow` typed in the viewer
+  (the working directory is another repository) trusts the file shown, the
+  agent with `repo_prompt` sends it, a changed file is refused. Needs `ui.nvim`.
+- `ai-completion-blink` -- on the user's installed config (`config = "user"`,
+  a skip on CI): with blink.cmp's menu open, `<Tab>` moves in the menu and
+  writes no suggestion.
 
 No sheet reaches a provider: `TESTS/sheets/_helpers.lua` registers a stand-in
 provider `sheet` that answers asynchronously and records each request. The
 live sheets (`ai-live-claude`, `ai-live-openai`, `ai-live-gemini`,
-`completion-thinking-tokens`) are the exception: real keys and the real API,
-so they are a reported skip in the suite and run only by hand with
+`ai-live-ollama`, `ai-live-ai-desktop`, `completion-thinking-tokens`) are the
+exception: real keys and the real API, or a local Ollama / ai-desktop that the
+sheet's variable (`AI_OLLAMA_HOST`, `AI_DESKTOP_HOST`, pointing at 127.0.0.1)
+opts into. They are a reported skip in the suite and run only by hand with
 `testing sheets run --live --sheet <id> --root .` (never on CI).
 
 The two documentation specs are the odd ones out: they test the *documentation*
