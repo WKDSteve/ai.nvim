@@ -300,6 +300,48 @@ describe("ai.repo_prompt", function()
       assert.is_true(vim.tbl_contains(vim.fn.getcompletion("Ai trust ", "cmdline"), "allow"))
     end)
 
+    it(
+      "allow and forget typed in the review popup act on the file shown, not on the working directory",
+      function()
+        write(root .. "/.ai.md", "Answer in German.")
+        -- the working directory is another repository; the popup takes the focus like the real viewer
+        local other = vim.fn.tempname()
+        vim.fn.mkdir(other .. "/.git", "p")
+        write(other .. "/.ai.md", "Other repo.")
+        local cwd = vim.fn.getcwd()
+        vim.cmd.cd(other)
+        package.loaded["ui.kit"].popup = function(opts)
+          shown = opts
+          local buf = vim.api.nvim_create_buf(false, true)
+          vim.bo[buf].buftype = "nofile"
+          vim.bo[buf].bufhidden = "wipe"
+          vim.api.nvim_open_win(
+            buf,
+            true,
+            { relative = "editor", row = 1, col = 1, width = 30, height = 5 }
+          )
+        end
+        local rp = setup()
+        require("ai.bindings.usrcmds").setup()
+        local ok, err = pcall(function()
+          vim.cmd("Ai trust")
+          assert.are.equal(root .. "/.ai.md (17 bytes)", shown.lines[1])
+          assert.are_not.equal(bufnr, vim.api.nvim_get_current_buf())
+          vim.cmd("Ai trust allow")
+          assert.is_truthy(notes[#notes]:find("trusted: " .. root .. "/.ai.md", 1, true))
+          vim.api.nvim_win_close(0, true)
+          assert.are.equal("Answer in German.", rp.load())
+          vim.cmd("Ai trust")
+          vim.cmd("Ai trust forget")
+          vim.api.nvim_win_close(0, true)
+          assert.are.equal("repo_prompt_untrusted", select(2, rp.load()).kind)
+        end)
+        vim.cmd.cd(cwd)
+        vim.fn.delete(other, "rf")
+        assert(ok, err)
+      end
+    )
+
     it("reports a missing file instead of showing anything", function()
       setup()
       require("ai.bindings.usrcmds").setup()

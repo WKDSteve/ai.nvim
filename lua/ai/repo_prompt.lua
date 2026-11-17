@@ -25,6 +25,12 @@ local M = {}
 local shown = {}
 
 ---@internal
+---The file `show()` showed last this session: `:Ai trust allow` is typed in the review popup, whose scratch buffer
+---belongs to no repository (it would fall back to the working directory, maybe another repository).
+---@type string|nil
+local last_shown = nil
+
+---@internal
 ---Where the trust records live; a function so a spec can point it at a temp file.
 ---@return string
 function M.store_path()
@@ -113,6 +119,23 @@ function M.locate(bufnr)
       )
   end
   return vim.fs.normalize(vim.fs.joinpath(root, name))
+end
+
+---@internal
+---The file `allow()`/`forget()` act on: from a buffer of a file, its repository; from any other buffer (the review
+---popup of `:Ai trust`, a help or terminal buffer) the file shown last, when there is one.
+---@param bufnr? integer
+---@return string|nil path
+---@return LibErrorValue|nil err
+local function target(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  local file_buffer = vim.api.nvim_buf_is_valid(bufnr)
+    and vim.bo[bufnr].buftype == ""
+    and vim.api.nvim_buf_get_name(bufnr) ~= ""
+  if not file_buffer and last_shown then
+    return last_shown
+  end
+  return M.locate(bufnr)
 end
 
 ---@internal
@@ -205,16 +228,18 @@ function M.show(bufnr)
   end
   local hash = vim.fn.sha256(text)
   shown[path] = hash
+  last_shown = path
   return { path = path, text = text, trusted = read_store()[path] == hash }
 end
 
----Trust the content of the repository's prompt file that `show()` returned this session. A file not shown, or
+---Trust the content of the repository's prompt file that `show()` returned this session (from a buffer that is no
+---file, such as the review popup itself: the file shown last). A file not shown, or
 ---changed since, is refused: what is trusted is always what was read.
 ---@param bufnr? integer
 ---@return string|nil path trusted
 ---@return LibErrorValue|nil err
 function M.allow(bufnr)
-  local path, err = M.locate(bufnr)
+  local path, err = target(bufnr)
   if not path then
     return nil, err
   end
@@ -256,7 +281,7 @@ end
 ---@return string|nil path forgotten (also when it had no record)
 ---@return LibErrorValue|nil err
 function M.forget(bufnr)
-  local path, err = M.locate(bufnr)
+  local path, err = target(bufnr)
   if not path then
     return nil, err
   end
@@ -284,6 +309,7 @@ end
 ---For the specs: forget what `show()` remembered this session.
 function M._reset()
   shown = {}
+  last_shown = nil
 end
 
 return M
