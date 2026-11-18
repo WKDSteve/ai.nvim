@@ -4,7 +4,8 @@
 -- fixed answer, stream() in more than one piece, and a claude- model that does not exist (the Anthropic error passed
 -- on, readable, no hang). The child has no Anthropic key: only ai-desktop holds one.
 --
--- Runs only with:  testing sheets run --live --sheet ai.live-ai-desktop-claude --root <ai.nvim> [--tasks <vault>]
+-- Runs only with:  testing sheets run --live --sheet ai.live-ai-desktop-claude --root <ai.nvim>
+-- (into its task instead: --task <the task below> --tasks <vault>; --sheet takes no --tasks)
 -- (AI_DESKTOP_HOST=http://127.0.0.1:8080 set as the opt-in, ai-desktop started with an ANTHROPIC_API_KEY of its own;
 -- never on CI, a skip without --live or without the variable)
 return {

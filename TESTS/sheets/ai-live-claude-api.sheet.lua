@@ -4,7 +4,8 @@
 -- (fixtures in TESTS/sheets/fixtures/live: a red square, a page with the code word ZEBRA-4711), and a temperature
 -- goes through on a model that takes one. All five requests run at once on the cheapest model that can do all of it.
 --
--- Runs only with:  testing sheets run --live --sheet ai.live-claude-api --root <ai.nvim> [--tasks <vault>]
+-- Runs only with:  testing sheets run --live --sheet ai.live-claude-api --root <ai.nvim>
+-- (into its task instead: --task <the task below> --tasks <vault>; --sheet takes no --tasks)
 -- (ANTHROPIC_API_KEY set; never on CI, a skip without --live or without the key)
 return {
   id = "ai.live-claude-api",

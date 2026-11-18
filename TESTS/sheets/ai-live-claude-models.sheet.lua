@@ -5,7 +5,8 @@
 -- takes none). A wrong table entry shows here as an HTTP 400 for that model. A model id that does not exist must
 -- come back as a readable error.
 --
--- Runs only with:  testing sheets run --live --sheet ai.live-claude-models --root <ai.nvim> [--tasks <vault>]
+-- Runs only with:  testing sheets run --live --sheet ai.live-claude-models --root <ai.nvim>
+-- (into its task instead: --task <the task below> --tasks <vault>; --sheet takes no --tasks)
 -- (ANTHROPIC_API_KEY set; never on CI, a skip without --live or without the key)
 return {
   id = "ai.live-claude-models",

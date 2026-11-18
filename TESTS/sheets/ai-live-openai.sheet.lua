@@ -3,7 +3,8 @@
 -- a fixed answer, stream() arriving in more than one piece, and the error path with a wrong key (a readable error,
 -- never an empty success). The wrong key is passed per request (`api_key`), so the real key is never changed.
 --
--- Runs only with:  testing sheets run --live --sheet ai.live-openai --root <ai.nvim> [--tasks <vault>]
+-- Runs only with:  testing sheets run --live --sheet ai.live-openai --root <ai.nvim>
+-- (into its task instead: --task <the task below> --tasks <vault>; --sheet takes no --tasks)
 -- (OPENAI_API_KEY set; never on CI, a skip without --live or without the key)
 return {
   id = "ai.live-openai",

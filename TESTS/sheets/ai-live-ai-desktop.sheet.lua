@@ -3,7 +3,8 @@
 -- arriving in more than one piece, and the error path with the service unreachable (a readable error, no hang, never an
 -- empty success): the child points AI_DESKTOP_HOST at a closed port, the running service is not touched.
 --
--- Runs only with:  testing sheets run --live --sheet ai.live-ai-desktop --root <ai.nvim> [--tasks <vault>]
+-- Runs only with:  testing sheets run --live --sheet ai.live-ai-desktop --root <ai.nvim>
+-- (into its task instead: --task <the task below> --tasks <vault>; --sheet takes no --tasks)
 -- (AI_DESKTOP_HOST=http://127.0.0.1:8080 set as the opt-in, ai-desktop started (`build/ai-desktop.exe`) with Ollama behind it; never on CI, a skip without --live or without the variable)
 return {
   id = "ai.live-ai-desktop",

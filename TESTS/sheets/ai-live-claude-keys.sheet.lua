@@ -3,9 +3,10 @@
 -- file of its own temp directory and defines two profiles: `datei` (that file) and `leer` (a variable that is
 -- empty). `leer` must fail with missing_api_key even while ANTHROPIC_API_KEY is set (a chosen profile never falls
 -- back to the default variable); `datei` must reach the real API after the variable is gone; `:Ai key reset`
--- (keys.reset) then has no key left. No line the plugin shows carries the key. The file is removed at the end.
+-- (keys.reset) then has no key left and claude is not available. No line the plugin shows carries the key. The file is removed at the end.
 --
--- Runs only with:  testing sheets run --live --sheet ai.live-claude-keys --root <ai.nvim> [--tasks <vault>]
+-- Runs only with:  testing sheets run --live --sheet ai.live-claude-keys --root <ai.nvim>
+-- (into its task instead: --task <the task below> --tasks <vault>; --sheet takes no --tasks)
 -- (ANTHROPIC_API_KEY set; never on CI, a skip without --live or without the key)
 return {
   id = "ai.live-claude-keys",
@@ -101,9 +102,10 @@ return {
     },
     { wait = "vim.g.live.reset ~= nil", timeout = 30000, note = "it answered" },
     {
-      expect = [[vim.g.live.reset.ok == false and vim.g.live.reset.kind == "missing_api_key"
+      expect = [[vim.g.live.reset.ok == false and vim.g.live.reset.kind == "provider_resolution"
         or error("reset: " .. vim.inspect(vim.g.live.reset, { newline = " ", indent = "" }), 0)]],
-      note = "no key left: missing_api_key, nothing sent",
+      note = "no profile and no variable: claude is not available (provider_resolution, as the specs say;"
+        .. " missing_api_key is only for a chosen profile without a key), nothing sent",
     },
     {
       expect = [[(function()

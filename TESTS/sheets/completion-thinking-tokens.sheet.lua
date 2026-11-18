@@ -4,7 +4,8 @@
 -- way the completion asks; the output tokens of each model are measured (notes in the task, -1 = the request
 -- failed), then no model may err or stop at max_tokens (the failure line carries stop_reason and usage).
 --
--- Runs only with:  testing sheets run --live --sheet ai.completion-thinking-tokens --root <ai.nvim> [--tasks <vault>]
+-- Runs only with:  testing sheets run --live --sheet ai.completion-thinking-tokens --root <ai.nvim>
+-- (into its task instead: --task <the task below> --tasks <vault>; --sheet takes no --tasks)
 -- (ANTHROPIC_API_KEY set; never on CI, a skip without --live or without the key)
 return {
   id = "ai.completion-thinking-tokens",

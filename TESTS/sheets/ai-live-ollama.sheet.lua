@@ -3,7 +3,8 @@
 -- arriving in more than one piece, and the error path with the service unreachable (a readable error, no hang, never an
 -- empty success): the child points AI_OLLAMA_HOST at a closed port, the running service is not touched.
 --
--- Runs only with:  testing sheets run --live --sheet ai.live-ollama --root <ai.nvim> [--tasks <vault>]
+-- Runs only with:  testing sheets run --live --sheet ai.live-ollama --root <ai.nvim>
+-- (into its task instead: --task <the task below> --tasks <vault>; --sheet takes no --tasks)
 -- (AI_OLLAMA_HOST=http://127.0.0.1:11434 set as the opt-in, `ollama serve` running and `llama3.2` pulled; never on CI, a skip without --live or without the variable)
 return {
   id = "ai.live-ollama",
