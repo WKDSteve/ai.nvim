@@ -86,6 +86,16 @@ sheet's variable (`AI_OLLAMA_HOST`, `AI_DESKTOP_HOST`, pointing at 127.0.0.1)
 opts into. They are a reported skip in the suite and run only by hand with
 `testing sheets run --live --sheet <id> --root .` (never on CI).
 
+Three more live sheets go past a bare prompt on the Claude API:
+`ai-live-claude-api` (system prompt, a `max_tokens` stop with real usage, an
+image and a PDF from `TESTS/sheets/fixtures/live/`, temperature),
+`ai-live-claude-models` (one request per current model with an effort level,
+an unknown model) and `ai-live-claude-keys` (key profiles with the real key: a
+file profile, an empty one that must not fall back, reset).
+`ai-live-ai-desktop-claude` sends a `claude-` model through a local ai-desktop
+that holds its own key. `ai-claude-api-key-setup` is a manual sheet: getting a
+Console key and setting it, which only a person can do.
+
 The two documentation specs are the odd ones out: they test the *documentation*
 (REL-08), not the code. Both read the docs at run time and diff them against the
 code, and both share their helpers (`docs/*.md` blocks and tables, running a
