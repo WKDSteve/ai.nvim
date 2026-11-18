@@ -15,7 +15,7 @@ return {
     env = { "ANTHROPIC_API_KEY" },
     hosts = { "api.anthropic.com" },
     cost = "seven short requests (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable 5.2, Opus 4.5, Sonnet 4.5, one refused),"
-      .. " at most 2048 output tokens each, room for thinking: a few cents",
+      .. " at most 8192 output tokens each (thinking at xhigh/max counts against it): a few cents, at worst some 20",
   },
   steps = {
     {
@@ -33,7 +33,7 @@ return {
         }
         for model, effort in pairs(vim.g.cases) do
           require("ai").ask(
-            { model = model, effort = effort, prompt = "Reply with exactly the word: PONG", max_tokens = 2048 },
+            { model = model, effort = effort, prompt = "Reply with exactly the word: PONG", max_tokens = 8192 },
             function(ok, res)
               local all = vim.g.live
               all[model] = ok and { ok = true, text = res.text, stop_reason = res.stop_reason, usage = res.usage }

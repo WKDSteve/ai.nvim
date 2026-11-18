@@ -22,6 +22,12 @@ return {
         _G.sheet_key = vim.env.ANTHROPIC_API_KEY
         _G.key_file = vim.fn.tempname() .. ".key"
         vim.fn.writefile({ _G.sheet_key }, _G.key_file)
+        -- the last step removes it; this also covers a run that fails or is stopped before it
+        vim.api.nvim_create_autocmd("VimLeavePre", {
+          callback = function()
+            os.remove(_G.key_file)
+          end,
+        })
         vim.env.AI_SHEET_EMPTY_KEY = nil
         require("ai").setup({
           provider = "claude",
