@@ -76,9 +76,22 @@ one sheet alone: `testing sheets run --sheet <id> --root .`.
 - `ai-completion-blink` -- on the user's installed config (`config = "user"`,
   a skip on CI): with blink.cmp's menu open, `<Tab>` moves in the menu and
   writes no suggestion.
+- `ai-claude-cli`, `ai-copilot-cli` -- `:Ai provider claude-cli` / `copilot`,
+  then `:Ai ask`: the provider starts its CLI (the stand-ins of the provider
+  specs, `TESTS/ai/fixtures/fake_*.lua` under `nvim -l`) and the viewer shows
+  only the answer. Needs `ui.nvim`.
+- `ai-key-command` -- a key profile with `command` (`TESTS/sheets/fixtures/print_key.lua`,
+  a fake key), `:Ai key` picks it, `:Ai ask` runs the command and sends its key
+  to a stub of `lib.nvim.net.curl`; the key is never on the screen. Needs `ui.nvim`.
+
+These three and `TESTS/sheets/features.lua` (the catalog of the functionalities
+that start a process, testing.nvim `docs/SHEETS.md`) are what `testing perf`
+measures; the HTTP providers are marked there as measured only by the live
+sheets.
 
 No sheet reaches a provider: `TESTS/sheets/_helpers.lua` registers a stand-in
-provider `sheet` that answers asynchronously and records each request. The
+provider `sheet` that answers asynchronously and records each request (the
+three sheets above use stand-in CLIs and a stub of curl instead). The
 live sheets (`ai-live-claude`, `ai-live-openai`, `ai-live-gemini`,
 `ai-live-ollama`, `ai-live-ai-desktop`, `completion-thinking-tokens`) are the
 exception: real keys and the real API, or a local Ollama / ai-desktop that the
