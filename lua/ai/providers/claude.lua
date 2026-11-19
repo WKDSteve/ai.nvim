@@ -44,7 +44,9 @@ local M = {
 
 local API_URL = "https://api.anthropic.com/v1/messages"
 local ANTHROPIC_VERSION = "2023-06-01"
-local DEFAULT_MODEL = "claude-opus-4-5"
+-- The current Opus (decision 2026-11-19, the same tier as before): it takes every effort level and no
+-- sampling parameter, so a request without a model sends no temperature (accepts_temperature).
+local DEFAULT_MODEL = "claude-opus-5-5"
 M.default_model = DEFAULT_MODEL
 -- Anthropic's Messages API requires max_tokens on every request (unlike
 -- OpenAI/Ollama/Gemini, which default it server-side) -- this is that

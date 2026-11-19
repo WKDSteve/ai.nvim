@@ -11,7 +11,7 @@ require("ai").setup({
     allowed = {},                             -- provider ids this machine may use; empty = no restriction, see "Provider policy"
   },
   keys = {},                                  -- named API-key profiles per provider; empty = each provider's own variable, see "Key profiles"
-  model = {},                                 -- e.g. { claude = "claude-opus-4-5" } -- not validated here, see "Model ids" below
+  model = {},                                 -- e.g. { claude = "claude-opus-5-5" } -- not validated here, see "Model ids" below
   agents = {},                                -- named presets { name = { provider, model, system } }, see "Agents" below
   agent = false,                              -- the agent active at startup, a name from agents; false = none
   repo_prompt = {
@@ -176,7 +176,7 @@ model" without three separate settings:
 ```lua
 -- two more keys of the setup() block above
 agents = {
-  review = { provider = "claude", model = "claude-opus-4-5", system = "You review code. Be strict." },
+  review = { provider = "claude", model = "claude-opus-5-5", system = "You review code. Be strict." },
   quick = { provider = "ollama", model = "llama3" },
   terse = { system = "Answer in one sentence." }, -- keeps the configured provider and model
 },

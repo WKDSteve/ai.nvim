@@ -19,7 +19,7 @@
 ---@field provider_order? string[] `"auto"` resolution order (default `{"claude","ollama","openai","gemini","ai_desktop"}`) -- `"ai_desktop"` is last since it needs a local server the user must run themselves; see `ai.providers`'s module doc
 ---@field policy? Ai.PolicyOptions Which providers this machine may use at all (`lua/ai/policy.lua`)
 ---@field keys? table<string, Ai.KeyProvider> Named API-key profiles per provider id (`lua/ai/keys.lua`); empty (default) = each provider reads its own environment variable
----@field model? table<string, string> Default model per provider id, e.g. `{ claude = "claude-opus-4-5" }`
+---@field model? table<string, string> Default model per provider id, e.g. `{ claude = "claude-opus-5-5" }`
 ---@field agents? table<string, Ai.Agent> Named presets of provider, model and system prompt (default `{}`); see `:Ai agent`
 ---@field agent? string|false Name of the active agent from `agents`, `false` (default) = none; changed for the session by `:Ai agent`
 ---@field repo_prompt? Ai.RepoPromptOptions The repository's own system-prompt file, for agents with `repo_prompt = true`

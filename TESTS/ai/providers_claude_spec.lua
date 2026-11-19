@@ -54,8 +54,8 @@ describe("ai.providers.claude", function()
       }) do
         assert.is_true(claude.accepts_temperature(model), model)
       end
-      -- unset: the provider's own default model (claude-opus-4-5) decides
-      assert.is_true(claude.accepts_temperature(nil))
+      -- unset: the provider's own default model (claude-opus-5-5) decides, and it takes none
+      assert.is_false(claude.accepts_temperature(nil))
     end
   )
 
@@ -82,8 +82,9 @@ describe("ai.providers.claude", function()
     }) do
       assert.is_false(claude.accepts_effort(model), model)
     end
-    -- unset: the provider's own default model (claude-opus-4-5) decides
+    -- unset: the provider's own default model (claude-opus-5-5) decides, with every level
     assert.is_true(claude.accepts_effort(nil))
+    assert.is_true(claude.accepts_effort(nil, "xhigh"))
     -- per level
     assert.is_false(claude.accepts_effort("claude-opus-4-5", "xhigh"))
     assert.is_false(claude.accepts_effort("claude-opus-4-6", "xhigh"))
@@ -298,7 +299,7 @@ describe("ai.providers.claude", function()
     -- the level is checked too: Opus 4.5 has no xhigh/max, Opus/Sonnet 4.6 no xhigh (a 400 otherwise)
     for _, case in ipairs({
       { model = "claude-opus-4-5", effort = "xhigh", sent = "high" },
-      { model = nil, effort = "max", sent = "high" }, -- the default model is claude-opus-4-5
+      { model = nil, effort = "max", sent = "max" }, -- the default model is claude-opus-5-5
       { model = "claude-opus-4-5-20251101", effort = "max", sent = "high" },
       { model = "claude-opus-4-6", effort = "xhigh", sent = "high" },
       { model = "claude-sonnet-4-6", effort = "xhigh", sent = "high" },

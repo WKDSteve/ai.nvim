@@ -34,7 +34,7 @@ local DEFAULTS = {
   --     extern = { command = { "pass", "show", "anthropic" } } } } }
   keys = {},
 
-  -- Per-provider default model, e.g. { claude = "claude-opus-4-5" }. Empty
+  -- Per-provider default model, e.g. { claude = "claude-opus-5-5" }. Empty
   -- means each provider module's own built-in default.
   model = {},
 
@@ -42,7 +42,7 @@ local DEFAULTS = {
   -- switches between. Empty means no preset: every request resolves its
   -- provider, model and system prompt as before. Shape:
   --   agents = {
-  --     review = { provider = "claude", model = "claude-opus-4-5", system = "You review code." },
+  --     review = { provider = "claude", model = "claude-opus-5-5", system = "You review code." },
   --     local_ = { provider = "ollama", model = "llama3" },
   --   }
   -- Every field is optional; a field a request sets itself always wins.

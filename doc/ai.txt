@@ -150,7 +150,7 @@ DEFAULTS.lua` is the source of truth. >lua
       allowed = {},                           -- provider ids this machine may use; empty = no restriction
     },
     keys = {},                                -- named API-key profiles per provider; empty = each provider's own variable
-    model = {},                               -- e.g. { claude = "claude-opus-4-5" }
+    model = {},                               -- e.g. { claude = "claude-opus-5-5" }
     agents = {},                              -- named presets { name = { provider, model, system } }, see |:Ai-agent|
     agent = false,                            -- the agent active at startup, a name from agents; false = none
     repo_prompt = {
@@ -368,7 +368,7 @@ MISSING: reason".
   provider is subject to |ai-policy| like any request for it.
   Configure: >lua
     agents = {
-      review = { provider = "claude", model = "claude-opus-4-5", system = "You review code." },
+      review = { provider = "claude", model = "claude-opus-5-5", system = "You review code." },
       terse = { system = "Answer in one sentence." },
     },
     agent = "review",
@@ -872,7 +872,7 @@ requests to it: after every |ai.ask()| and |ai.stream()| call that reached a
 provider -- the quick actions, `:Ai`, inline completion and bulk requests
 (|ai-bulk|) all go through the same path -- one event goes to
 `POST {host}/usage/events`: >
-  { "provider": "claude", "model": "claude-opus-4-5", "stream": false,
+  { "provider": "claude", "model": "claude-opus-5-5", "stream": false,
     "ok": true, "prompt_tokens": 37, "completion_tokens": 3,
     "duration_ms": 812 }
 <
