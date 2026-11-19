@@ -91,7 +91,8 @@ Three more live sheets go past a bare prompt on the Claude API:
 image and a PDF from `TESTS/sheets/fixtures/live/`, temperature),
 `ai-live-claude-models` (one request per current model with an effort level,
 an unknown model) and `ai-live-claude-keys` (key profiles with the real key: a
-file profile, an empty one that must not fall back, reset).
+file profile, an empty one that must not fall back, reset; `:Ai key` and
+`:checkhealth ai` name the profile and never the key).
 `ai-live-ai-desktop-claude` sends a `claude-` model through a local ai-desktop
 that holds its own key. `ai-claude-api-key-setup` is a manual sheet: getting a
 Console key and setting it, which only a person can do.

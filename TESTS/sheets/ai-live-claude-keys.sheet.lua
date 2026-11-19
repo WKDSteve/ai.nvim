@@ -95,6 +95,26 @@ return {
     },
     {
       lua = [[
+        vim.cmd("checkhealth ai")
+        _G.health = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
+        vim.cmd("bwipeout!")
+      ]],
+      timeout = 30000,
+      note = ":checkhealth ai with profile datei in force",
+    },
+    {
+      expect = [[(function()
+        local h = _G.health
+        if h:find(_G.sheet_key, 1, true) then
+          error("checkhealth printed the key", 0)
+        end
+        return h:find("claude: available", 1, true) and h:find("claude: profile datei (file, key present)", 1, true)
+          or error("checkhealth: " .. h:gsub("\n", " | "):sub(1, 600), 0)
+      end)()]],
+      note = ":checkhealth ai: claude available, its profile and key present, never the key",
+    },
+    {
+      lua = [[
         require("ai.keys").reset("claude")
         _G.ask_as("reset")
       ]],
@@ -119,8 +139,5 @@ return {
       end)()]],
       note = "no notification carried the key; the key file is removed",
     },
-  },
-  manual = {
-    "In the real editor with keys.claude.profiles set: :Ai key shows the profile and key present, :checkhealth ai the same, never the key",
   },
 }
