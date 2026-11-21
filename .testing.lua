@@ -83,18 +83,18 @@ return {
       -- `testing ci land`: a check branch ci/** runs the hosted legs, main moves only once it is green there
       land = true,
       -- The optional soft dependencies, below .deps/ where TESTS/minimal_init.lua finds them: without them the real
-      -- integration describes of TESTS/ai/context_spec.lua are pending on every leg. data.nvim and gitsuite.nvim are
-      -- pinned to a main commit (neither has a ci-verified branch); move the pin by hand. ui.nvim follows its
-      -- ci-verified branch; TESTS/sheets/_helpers.lua finds it there for TESTS/sheets/ai-quick-keys.sheet.lua.
+      -- integration describes of TESTS/ai/context_spec.lua are pending on every leg. data.nvim, gitsuite.nvim and
+      -- ui.nvim follow their ci-verified branch; TESTS/sheets/_helpers.lua finds ui.nvim there for
+      -- TESTS/sheets/ai-quick-keys.sheet.lua.
       checkouts = {
         {
           repo = "WKDSteve/data.nvim",
-          ref = "9afe40f02332c18f16e25a149524fe731d930e28",
+          ref = "ci-verified",
           why = "the real data.nvim describe of TESTS/ai/context_spec.lua (structured_data)",
         },
         {
           repo = "WKDSteve/gitsuite.nvim",
-          ref = "dd34a7e72c6c2fa6fe4cff5a3ce6c450a20259f5",
+          ref = "ci-verified",
           why = "the real gitsuite.nvim describe of TESTS/ai/context_spec.lua (conflict)",
         },
         {
