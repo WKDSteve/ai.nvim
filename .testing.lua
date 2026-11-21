@@ -21,7 +21,12 @@ return {
   -- DATA_NVIM_DIR / GITSUITE_NVIM_DIR: where TESTS/minimal_init.lua finds the optional data.nvim and gitsuite.nvim
   -- (the worktree of `ci commit` has no sibling checkouts).
   -- UI_NVIM_DIR: where TESTS/sheets/_helpers.lua finds ui.nvim for the sheets that press the quick-action keys.
-  env_allow = { "CLAUDE_CODE_DISABLE_ATTACHMENTS", "DATA_NVIM_DIR", "GITSUITE_NVIM_DIR", "UI_NVIM_DIR" },
+  env_allow = {
+    "CLAUDE_CODE_DISABLE_ATTACHMENTS",
+    "DATA_NVIM_DIR",
+    "GITSUITE_NVIM_DIR",
+    "UI_NVIM_DIR",
+  },
   -- A test sheet (TESTS/ai/sheets_spec.lua) is one case that starts a child editor, some of them twice more
   -- (`restart`); under load that takes longer than the default 10 s.
   timeouts = { case_ms = 60000, file_ms = 300000 },
